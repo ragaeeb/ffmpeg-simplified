@@ -1,4 +1,4 @@
-[![wakatime](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/e8859a7e-7cfc-4447-a7c0-965229145506.svg)](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/e8859a7e-7cfc-4447-a7c0-965229145506) [![Node.js CI](https://github.com/ragaeeb/ffmpeg-simple/actions/workflows/build.yml/badge.svg)](https://github.com/ragaeeb/ffmpeg-simple/actions/workflows/build.yml) ![GitHub License](https://img.shields.io/github/license/ragaeeb/ffmpeg-simple) ![GitHub Release](https://img.shields.io/github/v/release/ragaeeb/ffmpeg-simple) [![codecov](https://codecov.io/gh/ragaeeb/ffmpeg-simple/graph/badge.svg?token=6B40XM3HNB)](https://codecov.io/gh/ragaeeb/ffmpeg-simple) [![Size](https://deno.bundlejs.com/badge?q=ffmpeg-simple@1.0.0)](https://bundlejs.com/?q=ffmpeg-simple%401.0.0) ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label&color=blue) ![npm](https://img.shields.io/npm/v/ffmpeg-simple) ![npm](https://img.shields.io/npm/dm/ffmpeg-simple) ![GitHub issues](https://img.shields.io/github/issues/ragaeeb/ffmpeg-simple) ![GitHub stars](https://img.shields.io/github/stars/ragaeeb/ffmpeg-simple?style=social)
+[![wakatime](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/e8859a7e-7cfc-4447-a7c0-965229145506.svg)](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/e8859a7e-7cfc-4447-a7c0-965229145506) [![Node.js CI](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml/badge.svg)](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml) ![GitHub License](https://img.shields.io/github/license/ragaeeb/ffmpeg-simplified) ![GitHub Release](https://img.shields.io/github/v/release/ragaeeb/ffmpeg-simplified) [![codecov](https://codecov.io/gh/ragaeeb/ffmpeg-simplified/graph/badge.svg?token=6B40XM3HNB)](https://codecov.io/gh/ragaeeb/ffmpeg-simplified) [![Size](https://deno.bundlejs.com/badge?q=ffmpeg-simplified@1.0.0)](https://bundlejs.com/?q=ffmpeg-simplified%401.0.0) ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label&color=blue) ![npm](https://img.shields.io/npm/v/ffmpeg-simplified) ![npm](https://img.shields.io/npm/dm/ffmpeg-simplified) ![GitHub issues](https://img.shields.io/github/issues/ragaeeb/ffmpeg-simplified) ![GitHub stars](https://img.shields.io/github/stars/ragaeeb/ffmpeg-simplified?style=social)
 
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
@@ -11,20 +11,20 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
 
-# ffmpeg-simple
+# ffmpeg-simplified
 
-`ffmpeg-simple` is a simple wrapper around `ffmpeg` designed to simplify common audio and video processing tasks through easy-to-use APIs.
+`ffmpeg-simplified` is a simple wrapper around `ffmpeg` designed to simplify common audio and video processing tasks through easy-to-use APIs.
 
 ## Installation
 
-To install ffmpeg-simple, use npm or yarn:
+To install ffmpeg-simplified, use npm or yarn:
 
 ```bash
-npm install ffmpeg-simple
+npm install ffmpeg-simplified
 # or
-yarn add ffmpeg-simple
+yarn add ffmpeg-simplified
 # or
-pnpm i ffmpeg-simple
+pnpm i ffmpeg-simplified
 ```
 
 ## Requirements
@@ -49,7 +49,7 @@ import {
   formatMedia,
   detectSilences,
   getMediaDuration,
-} from "ffmpeg-simple";
+} from "ffmpeg-simplified";
 ```
 
 ### detectSilences

@@ -4,7 +4,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 
 export const createTempDir = async (
-  prefix = "ffmpeg-simple"
+  prefix = "ffmpeg-simplified"
 ): Promise<string> => {
   const tempDirBase = path.join(os.tmpdir(), prefix);
   return fs.mkdtemp(tempDirBase);

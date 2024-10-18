@@ -1,5 +1,5 @@
 {
-  "name": "ffmpeg-simple",
+  "name": "ffmpeg-simplified",
   "version": "1.0.0",
   "description": "A wrapper around ffmpeg to achieve tasks via simple APIs.",
   "main": "dist/main.js",
