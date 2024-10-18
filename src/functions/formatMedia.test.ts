@@ -2,7 +2,7 @@ import { describe, expect, it, vi, beforeAll, beforeEach } from "vitest";
 import ffmpeg from "fluent-ffmpeg";
 import { formatMedia } from "./formatMedia";
 import { createTempDir, fileExists } from "../utils/io";
-import { getMediaDuration } from "./common";
+import { getMediaDuration } from "./getMediaDuration";
 import path from "node:path";
 
 describe("formatMedia", () => {

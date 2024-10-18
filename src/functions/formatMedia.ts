@@ -35,6 +35,15 @@ const buildConversionFilters = ({
   return filters;
 };
 
+/**
+ * Preprocesses a media file with options like noise reduction and format conversion.
+ *
+ * @param {Readable | string} input - Input stream or file path.
+ * @param {string} outputDir - Directory where the processed file will be saved.
+ * @param {PreprocessOptions} [options] - Optional preprocessing options.
+ * @param {PreprocessingCallbacks} [callbacks] - Optional callbacks for progress tracking.
+ * @returns {Promise<string>} - Promise resolving to the path of the processed media file.
+ */
 export const formatMedia = async (
   input: Readable | string,
   outputDir: string,

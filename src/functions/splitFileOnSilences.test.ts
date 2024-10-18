@@ -6,7 +6,7 @@ import {
   mapSilenceResultsToChunkRanges,
   splitFileOnSilences,
 } from "./splitFileOnSilences";
-import { getMediaDuration } from "./common";
+import { getMediaDuration } from "./getMediaDuration";
 import { createTempDir } from "../utils/io";
 
 describe("splitOnSilence", () => {

@@ -1,12 +1,15 @@
 import ffmpeg from "fluent-ffmpeg";
 import logger from "../utils/logger";
 import path from "node:path";
+import type { SliceOptions } from "../types";
 
-interface SliceOptions {
-  ranges: [number, number][]; // Start/end times in seconds
-  outputFolder: string;
-}
-
+/**
+ * Slices a media file into multiple parts based on specified time ranges.
+ *
+ * @param {string} file - Path to the input media file.
+ * @param {SliceOptions} options - Options containing the time ranges and output folder.
+ * @returns {Promise<string[]>} - Promise resolving to an array of paths to the sliced files.
+ */
 export const slice = async (
   file: string,
   options: SliceOptions
@@ -17,7 +20,7 @@ export const slice = async (
 
   // Process each range
   for (let i = 0; i < options.ranges.length; i++) {
-    const [start, end] = options.ranges[i];
+    const { start, end } = options.ranges[i];
     const outputFile = path.join(
       options.outputFolder,
       `${fileName}_${i + 1}${fileExtension}`
@@ -25,19 +28,18 @@ export const slice = async (
 
     await new Promise<void>((resolve, reject) => {
       ffmpeg(file)
-        .setStartTime(start) // Start time of the slice
-        .setDuration(end - start) // Duration of the slice
-        .output(outputFile) // Output file for the slice
+        .setStartTime(start)
+        .setDuration(end - start)
+        .output(outputFile)
         .on("end", () => {
           logger.info(`Sliced video saved as ${outputFile}`);
           outputFiles.push(outputFile);
           resolve();
         })
-        .on("error", (err) => reject(err)) // Handle errors
-        .run(); // Execute FFmpeg
+        .on("error", (err) => reject(err))
+        .run();
     });
   }
 
-  // Return array of individual slice output file paths
   return outputFiles;
 };

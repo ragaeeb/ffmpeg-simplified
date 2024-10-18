@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getMediaDuration } from "./common";
+import { getMediaDuration } from "./getMediaDuration";
 
 describe("getMediaDuration", () => {
   it(

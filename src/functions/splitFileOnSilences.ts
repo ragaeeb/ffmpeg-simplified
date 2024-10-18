@@ -12,7 +12,7 @@ import {
   SPLIT_OPTIONS_DEFAULTS,
 } from "./constants";
 import deepmerge from "deepmerge";
-import { getMediaDuration } from "./common";
+import { getMediaDuration } from "./getMediaDuration";
 import { detectSilences } from "./detectSilences";
 
 export const mapSilenceResultsToChunkRanges = (
@@ -46,6 +46,15 @@ export const mapSilenceResultsToChunkRanges = (
   return chunks;
 };
 
+/**
+ * Splits an audio file into chunks based on silence detection.
+ *
+ * @param {string} filePath - Path to the input audio file.
+ * @param {string} outputDir - Directory where the audio chunks will be saved.
+ * @param {SplitOptions} [options] - Optional settings for splitting the file.
+ * @param {SplitOnSilenceCallbacks} [callbacks] - Optional callbacks for progress tracking.
+ * @returns {Promise<AudioChunk[]>} - Promise resolving to an array of audio chunks with file names and time ranges.
+ */
 export const splitFileOnSilences = async (
   filePath: string,
   outputDir: string,

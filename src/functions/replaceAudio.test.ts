@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
 
 import { createTempDir } from "../utils/io";
-import { getMediaDuration } from "./common";
+import { getMediaDuration } from "./getMediaDuration";
 import path from "node:path";
 
 describe("replaceAudio", () => {

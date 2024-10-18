@@ -13,7 +13,7 @@
 
 # ffmpeg-simple
 
-JavaScript SDK for accessing the books and resources provided by turath.io. This SDK allows you to interact with the turath.io API to retrieve book information, author details, specific pages, and perform searches across the database.
+`ffmpeg-simple` is a simple wrapper around `ffmpeg` designed to simplify common audio and video processing tasks through easy-to-use APIs.
 
 ## Installation
 
@@ -31,6 +31,8 @@ pnpm i ffmpeg-simple
 
 Node.js >= `20.0.0`
 
+Ensure you have `ffmpeg` installed. If not, you can use the `ffmpeg-static` package, which is already included as a dependency.
+
 ## Usage
 
 The SDK provides several functions to interact with the turath.io API. Below are the main functions that you can use:
@@ -38,125 +40,187 @@ The SDK provides several functions to interact with the turath.io API. Below are
 ### Importing the SDK
 
 ```javascript
-import { getBookInfo } from "ffmpeg-simple";
+import {
+  sliceAndMerge,
+  slice,
+  mergeSlices,
+  splitFileOnSilences,
+  replaceAudio,
+  formatMedia,
+  detectSilences,
+  getMediaDuration,
+} from "ffmpeg-simple";
 ```
 
-### 1. getAuthor
+### detectSilences
 
-Fetches information about an author by their ID.
+Detects silences in an audio file based on specified threshold and duration.
 
-```typescript
-import { getAuthor } from "ffmpeg-simple";
-
-(async () => {
-  try {
-    const author = await getAuthor(44);
-    console.log(author);
-  } catch (error) {
-    console.error(error.message);
-  }
-})();
-```
-
-Parameters:
-
-`id` (`number`): The unique identifier of the author.
-
-Returns: A promise that resolves to the author's information.
-
-Throws: Will throw an error if the author is not found.
-
-### 2. `getBookFile`
-
-Fetches the JSON file of a book by its ID.
-
-```typescript
-import { getBookFile } from "ffmpeg-simple";
-
-(async () => {
-  try {
-    const bookFile = await getBookFile(147927);
-    console.log(bookFile);
-  } catch (error) {
-    console.error(error.message);
-  }
-})();
+```javascript
+const silences = await detectSilences("audio.mp3", {
+  silenceDuration: 0.5,
+  silenceThreshold: -50,
+});
 ```
 
 Parameters:
 
-`id` (`number`): The unique identifier of the book.
+- filePath (string): Path to the input audio file.
+- options (SilenceDetectionOptions): Silence detection options.
 
-Returns: A promise that resolves to the book file information.
+Returns:
 
-Throws: Will throw an error if the book file is not found.
+- Promise<TimeRange[]>: Array of time ranges where silence was detected.
 
-### 3. `getBookInfo`
+### formatMedia
 
-Fetches the information about a book, including its metadata and indexes.
+Preprocesses a media file with options like noise reduction and format conversion.
 
-```typescript
-import { getBookInfo } from "ffmpeg-simple";
-
-(async () => {
-  const bookInfo = await getBookInfo(147927);
-  console.log(bookInfo);
-})();
+```javascript
+await formatMedia("input.wav", "./output", {
+  noiseReduction: {
+    highpass: 200,
+    lowpass: 3000,
+    dialogueEnhance: true,
+  },
+});
 ```
 
 Parameters:
 
-`id` (`number`): The unique identifier of the book.
+- input (Readable | string): Input stream or file path.
+- outputDir (string): Directory where the processed file will be saved.
+- options (PreprocessOptions, optional): Preprocessing options.
+- callbacks (PreprocessingCallbacks, optional): Callback functions for progress tracking.
 
-Returns: A promise that resolves to the book information including indexes.
+Returns:
 
-### 4. `getPage`
+- Promise<string>: Path to the processed media file.
 
-Fetches a specific page from a book by its book ID and page number.
+### getMediaDuration
 
-```typescript
-import { getPage } from "ffmpeg-simple";
+Retrieves the duration of a media file in seconds.
 
-(async () => {
-  try {
-    const page = await getPage(147927, 5);
-    console.log(page);
-  } catch (error) {
-    console.error(error.message);
-  }
-})();
+```javascript
+const duration = await getMediaDuration("video.mp4");
+console.log(`Duration: ${duration} seconds`);
 ```
 
 Parameters:
 
-`bookId` (`number`): The unique identifier of the book.
+- filePath (string): Path to the media file.
 
-`pageNumber` (`number`): The page number to retrieve.
+Returns:
 
-Returns: A promise that resolves to the page metadata and text.
+Promise<number>: Duration of the media file in seconds.
 
-Throws: Will throw an error if the page is not found.
+### mergeSlices
 
-### 5. `search`
+Merges multiple media files into a single file.
 
-Searches for books or content using a query string.
-
-```typescript
-import { search } from "ffmpeg-simple";
-
-(async () => {
-  const results = await search("الإسلام", { category: 6 });
-  console.log(results);
-})();
+```javascript
+await mergeSlices(["slice1.mp4", "slice2.mp4"], "mergedOutput.mp4");
 ```
 
 Parameters:
 
-`query` (`string`): The search query string.
+- inputFiles (string[]): Array of media file paths to merge.
+- outputFile (string): Path where the merged file will be saved.
 
-`options` (`SearchOptions`, optional): Additional search options such as category or sorting field.
+Returns:
 
-Returns: A promise that resolves to the search results, including count and data.
+- Promise<string>: Path to the merged output file.
+
+### replaceAudio
+
+Replaces the audio track of a video file with a new audio file.
+
+```javascript
+await replaceAudio("video.mp4", "newAudio.mp3", "outputVideo.mp4");
+```
+
+Parameters:
+
+- videoFile (string): Path to the input video file.
+- audioFile (string): Path to the new audio file.
+- outputFile (string): Path where the output video will be saved.
+
+Returns:
+
+Promise<string>: Path to the output video file.
+
+### slice
+
+Slices a media file into multiple parts based on specified time ranges.
+
+```javascript
+const slices = await slice("input.mp4", {
+  ranges: [
+    { start: 0, end: 60 },
+    { start: 120, end: 180 },
+  ],
+  outputFolder: "./slices",
+});
+
+console.log(slices); // ["./slices/input_0.mp4", "./slices/input_1.mp4"]
+```
+
+Parameters:
+
+- file (string): Path to the input media file.
+- options (SliceOptions): Options containing the time ranges and output folder.
+
+Returns:
+
+- Promise<string[]>: Array of paths to the sliced files.
+
+### sliceAndMerge
+
+Slices a media file based on specified time ranges and merges the slices into a single file.
+
+```javascript
+await sliceAndMerge("input.mp4", "output.mp4", {
+  ranges: [
+    { start: 0, end: 60 },
+    { start: 120, end: 180 },
+  ],
+});
+```
+
+Parameters:
+
+- inputFile (string): Path to the input media file.
+- outputFile (string): Path where the output file will be saved.
+- options (SliceAndMergeOptions): Options containing the time ranges.
+
+Returns:
+
+- Promise<string>: Path to the merged output file.
+
+### splitFileOnSilences
+
+Splits an audio file into chunks based on silence detection.
+
+```javascript
+const chunks = await splitFileOnSilences("audio.mp3", "./chunks", {
+  chunkDuration: 60,
+  silenceDetection: {
+    silenceDuration: 0.5,
+    silenceThreshold: -50,
+  },
+});
+```
+
+Parameters:
+
+- filePath (string): Path to the input audio file.
+- outputDir (string): Directory where the chunks will be saved.
+- options (SplitOptions, optional): Split options.
+- callbacks (SplitOnSilenceCallbacks, optional): Callback functions for progress tracking.
+
+Returns:
+
+- Promise<AudioChunk[]>: Array of audio chunks with file names and time ranges.
 
 ## Contributing
 

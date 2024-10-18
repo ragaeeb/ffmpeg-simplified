@@ -4,7 +4,7 @@ import { mergeSlices } from "./merge";
 import { slice } from "./slice";
 import { createTempDir } from "../utils/io";
 import { promises as fs } from "node:fs";
-import { getMediaDuration } from "./common";
+import { getMediaDuration } from "./getMediaDuration";
 import path from "node:path";
 
 describe("merge", () => {

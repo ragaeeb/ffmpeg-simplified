@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
-import { getMediaDuration } from "./common";
+import { getMediaDuration } from "./getMediaDuration";
 
 import { createTempDir } from "../utils/io";
 import { slice } from "./slice";
@@ -24,8 +24,8 @@ describe("slice", () => {
         "https://www.sample-videos.com/video321/mp4/240/big_buck_bunny_240p_1mb.mp4",
         {
           ranges: [
-            [0, 4],
-            [6, 8],
+            { start: 0, end: 4 },
+            { start: 6, end: 8 },
           ],
           outputFolder,
         }
@@ -39,6 +39,6 @@ describe("slice", () => {
       expect(await getMediaDuration(result[0])).toBeCloseTo(4, 3);
       expect(await getMediaDuration(result[1])).toBeCloseTo(2, 3);
     },
-    { timeout: 60000 }
+    { timeout: 30000 }
   );
 });

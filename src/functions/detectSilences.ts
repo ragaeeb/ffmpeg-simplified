@@ -22,6 +22,13 @@ const mapOutputToSilenceResults = (silenceLines: string[]): TimeRange[] => {
   return silences;
 };
 
+/**
+ * Detects silences in an audio file based on specified threshold and duration.
+ *
+ * @param {string} filePath - Path to the input audio file.
+ * @param {SilenceDetectionOptions} options - Options for silence detection.
+ * @returns {Promise<TimeRange[]>} - Promise resolving to an array of time ranges where silence was detected.
+ */
 export const detectSilences = (
   filePath: string,
   { silenceDuration, silenceThreshold }: SilenceDetectionOptions
