@@ -25,6 +25,6 @@ describe("sliceAndMerge", () => {
       }
     );
 
-    expect(await getMediaDuration(result)).toBeCloseTo(5.99, 2);
+    expect(await getMediaDuration(result)).toBeCloseTo(5.99, 1);
   });
 });

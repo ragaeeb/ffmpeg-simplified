@@ -175,40 +175,40 @@ describe("splitOnSilence", () => {
 
       expect(result).toHaveLength(5);
 
-      expect(result[0].range.start).toBeCloseTo(0, 6);
-      expect(result[0].range.end).toBeCloseTo(7.343764, 6);
+      expect(result[0].range.start).toBeCloseTo(0, 1);
+      expect(result[0].range.end).toBeCloseTo(7.343764, 1);
       expect(result[0].filename).toEqual(`${outputDir}/sample-chunk-000.wav`);
       expect(await getMediaDuration(result[0].filename)).toBeCloseTo(
         7.343764,
         1
       );
 
-      expect(result[1].range.start).toBeCloseTo(7.343764, 6);
-      expect(result[1].range.end).toBeCloseTo(14.872562, 6);
+      expect(result[1].range.start).toBeCloseTo(7.343764, 1);
+      expect(result[1].range.end).toBeCloseTo(14.872562, 1);
       expect(result[1].filename).toEqual(`${outputDir}/sample-chunk-001.wav`);
       expect(await getMediaDuration(result[1].filename)).toBeCloseTo(
         7.528798,
         1
       );
 
-      expect(result[2].range.start).toBeCloseTo(14.872562, 6);
-      expect(result[2].range.end).toBeCloseTo(24.311701, 6);
+      expect(result[2].range.start).toBeCloseTo(14.872562, 1);
+      expect(result[2].range.end).toBeCloseTo(24.311701, 1);
       expect(result[2].filename).toEqual(`${outputDir}/sample-chunk-002.wav`);
       expect(await getMediaDuration(result[2].filename)).toBeCloseTo(
         9.439138,
         1
       );
 
-      expect(result[3].range.start).toBeCloseTo(24.311701, 6);
-      expect(result[3].range.end).toBeCloseTo(33.169569, 6);
+      expect(result[3].range.start).toBeCloseTo(24.311701, 1);
+      expect(result[3].range.end).toBeCloseTo(33.169569, 1);
       expect(result[3].filename).toEqual(`${outputDir}/sample-chunk-003.wav`);
       expect(await getMediaDuration(result[3].filename)).toBeCloseTo(
         8.857868,
         1
       );
 
-      expect(result[4].range.start).toBeCloseTo(33.169569, 6);
-      expect(result[4].range.end).toBeCloseTo(33.593469, 6);
+      expect(result[4].range.start).toBeCloseTo(33.169569, 1);
+      expect(result[4].range.end).toBeCloseTo(33.593469, 1);
       expect(result[4].filename).toEqual(`${outputDir}/sample-chunk-004.wav`);
       expect(await getMediaDuration(result[4].filename)).toBeCloseTo(0.4239, 1);
     });

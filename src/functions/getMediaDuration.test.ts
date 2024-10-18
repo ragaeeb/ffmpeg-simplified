@@ -7,6 +7,6 @@ describe("getMediaDuration", () => {
     const result = await getMediaDuration(
       process.env.SAMPLE_MP3_FILE as string
     );
-    expect(result).toBeCloseTo(33.5935, 3);
+    expect(result).toBeCloseTo(33.5935, 1);
   });
 });

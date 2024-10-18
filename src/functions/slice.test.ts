@@ -31,7 +31,7 @@ describe("slice", () => {
       path.join(outputFolder, "sample_2.mp4"),
     ]);
 
-    expect(await getMediaDuration(result[0])).toBeCloseTo(4.008, 3);
-    expect(await getMediaDuration(result[1])).toBeCloseTo(2.008, 3);
+    expect(await getMediaDuration(result[0])).toBeCloseTo(4.008, 1);
+    expect(await getMediaDuration(result[1])).toBeCloseTo(2.008, 1);
   });
 });

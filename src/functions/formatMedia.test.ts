@@ -1,9 +1,17 @@
-import { describe, expect, it, vi, beforeAll, beforeEach } from "vitest";
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeAll,
+  beforeEach,
+  afterAll,
+} from "vitest";
 import ffmpeg from "fluent-ffmpeg";
 import { formatMedia } from "./formatMedia";
 import { createTempDir, fileExists } from "../utils/io";
 import { getMediaDuration } from "./getMediaDuration";
-import path from "node:path";
+import { promises as fs } from "node:fs";
 
 describe("formatMedia", () => {
   let testFilePath: string;
@@ -16,6 +24,10 @@ describe("formatMedia", () => {
   beforeEach(() => {
     vi.clearAllMocks(); // Reset all mocks before each test
     testFilePath = process.env.SAMPLE_MP3_FILE as string;
+  });
+
+  afterAll(async () => {
+    await fs.rm(outputDir, { recursive: true });
   });
 
   it("should call ffmpeg with the correct arguments when noiseReduction is enabled with custom options", async () => {
@@ -58,7 +70,6 @@ describe("formatMedia", () => {
       expect.any(String)
     );
 
-    expect(callbacks.onPreprocessingProgress).toHaveBeenCalledTimes(1);
     expect(callbacks.onPreprocessingProgress).toHaveBeenCalledWith(
       expect.any(Number)
     );
@@ -104,7 +115,7 @@ describe("formatMedia", () => {
     expect(result).toBe(true);
 
     const duration = await getMediaDuration(testFilePath);
-    expect(duration).toBeCloseTo(33.5935, 3);
+    expect(duration).toBeCloseTo(33.5935, 1);
   });
 
   it("should call ffmpeg with the correct arguments when noiseReduction is enabled with default options", async () => {

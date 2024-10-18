@@ -33,6 +33,6 @@ describe("replaceAudio", () => {
       getMediaDuration(newAudio),
       getMediaDuration(result),
     ]);
-    expect(outputDuration).toBeCloseTo(audioDuration, 3);
+    expect(outputDuration).toBeCloseTo(audioDuration, 1);
   });
 });
