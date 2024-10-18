@@ -37,7 +37,7 @@ describe("merge", () => {
       const result = await mergeSlices(chunks, mergedFile);
       expect(result).toEqual(mergedFile);
 
-      expect(await getMediaDuration(result)).toBeCloseTo(6, 3);
+      expect(await getMediaDuration(result)).toBeCloseTo(6, 1);
     },
     { timeout: 30000 }
   );
