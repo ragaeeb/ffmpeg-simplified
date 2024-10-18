@@ -1,4 +1,19 @@
 /**
+ * Represents a time range with start and end times in seconds.
+ */
+export type TimeRange = {
+  /**
+   * End time in seconds.
+   */
+  end: number;
+
+  /**
+   * Start time in seconds.
+   */
+  start: number;
+};
+
+/**
  * Options for noise reduction during media formatting.
  */
 export interface NoiseReductionOptions {
@@ -98,9 +113,9 @@ export type SliceOptions = {
  */
 export type SliceAndMergeOptions = {
   /**
-   * Array of time ranges to slice.
+   * Array of time ranges to slice. Can either be in the form of {start: 0, end: 10} or '0-0:10'
    */
-  ranges: TimeRange[];
+  ranges: TimeRange[] | string[];
 };
 
 /**
@@ -148,21 +163,6 @@ export interface SplitOnSilenceCallbacks {
    */
   onSplittingStarted?: (totalChunks: number) => Promise<void>;
 }
-
-/**
- * Represents a time range with start and end times in seconds.
- */
-export type TimeRange = {
-  /**
-   * End time in seconds.
-   */
-  end: number;
-
-  /**
-   * Start time in seconds.
-   */
-  start: number;
-};
 
 /**
  * Represents an audio chunk with a file name and time range.

@@ -1,5 +1,7 @@
 export default {
-    test: {
-        include: ['src/**/*.test.ts'],
-    },
+  test: {
+    globalSetup: ["./setupTests.ts"],
+    include: ["src/**/*.test.ts"],
+    setupFiles: ["./setupTests.ts"],
+  },
 };

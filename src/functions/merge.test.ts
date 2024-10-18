@@ -18,27 +18,20 @@ describe("merge", () => {
     await fs.rm(outputFolder, { recursive: true });
   });
 
-  it(
-    "should merge the slices",
-    async () => {
-      const chunks = await slice(
-        "https://www.sample-videos.com/video321/mp4/240/big_buck_bunny_240p_1mb.mp4",
-        {
-          ranges: [
-            [0, 4],
-            [6, 8],
-          ],
-          outputFolder,
-        }
-      );
+  it("should merge the slices", async () => {
+    const chunks = await slice(process.env.SAMPLE_MP4_FILE as string, {
+      ranges: [
+        { start: 0, end: 4 },
+        { start: 6, end: 8 },
+      ],
+      outputFolder,
+    });
 
-      const mergedFile = path.join(outputFolder, "merged.mp4");
+    const mergedFile = path.join(outputFolder, "merged.mp4");
 
-      const result = await mergeSlices(chunks, mergedFile);
-      expect(result).toEqual(mergedFile);
+    const result = await mergeSlices(chunks, mergedFile);
+    expect(result).toEqual(mergedFile);
 
-      expect(await getMediaDuration(result)).toBeCloseTo(6, 1);
-    },
-    { timeout: 30000 }
-  );
+    expect(await getMediaDuration(result)).toBeCloseTo(6, 1);
+  });
 });

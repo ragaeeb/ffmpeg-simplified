@@ -17,28 +17,21 @@ describe("slice", () => {
     await fs.rm(outputFolder, { recursive: true });
   });
 
-  it(
-    "should replace audio in the video file and resolve with the output file",
-    async () => {
-      const result = await slice(
-        "https://www.sample-videos.com/video321/mp4/240/big_buck_bunny_240p_1mb.mp4",
-        {
-          ranges: [
-            { start: 0, end: 4 },
-            { start: 6, end: 8 },
-          ],
-          outputFolder,
-        }
-      );
+  it("should replace audio in the video file and resolve with the output file", async () => {
+    const result = await slice(process.env.SAMPLE_MP4_FILE as string, {
+      ranges: [
+        { start: 0, end: 4 },
+        { start: 6, end: 8 },
+      ],
+      outputFolder,
+    });
 
-      expect(result).toEqual([
-        path.join(outputFolder, "big_buck_bunny_240p_1mb_1.mp4"),
-        path.join(outputFolder, "big_buck_bunny_240p_1mb_2.mp4"),
-      ]);
+    expect(result).toEqual([
+      path.join(outputFolder, "sample_1.mp4"),
+      path.join(outputFolder, "sample_2.mp4"),
+    ]);
 
-      expect(await getMediaDuration(result[0])).toBeCloseTo(4, 3);
-      expect(await getMediaDuration(result[1])).toBeCloseTo(2, 3);
-    },
-    { timeout: 30000 }
-  );
+    expect(await getMediaDuration(result[0])).toBeCloseTo(4.008, 3);
+    expect(await getMediaDuration(result[1])).toBeCloseTo(2.008, 3);
+  });
 });

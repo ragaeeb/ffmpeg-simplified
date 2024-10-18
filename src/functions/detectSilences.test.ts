@@ -4,13 +4,10 @@ import { detectSilences } from "./detectSilences";
 
 describe("detectSilences", () => {
   it("should detect silences for -35dB for 0.2s", async () => {
-    const result = await detectSilences(
-      "https://github.com/ragaeeb/tafrigh/raw/577b870b887b09f806ca3dba67019950981970a5/testing/khutbah.wav",
-      {
-        silenceDuration: 0.2,
-        silenceThreshold: -35,
-      }
-    );
+    const result = await detectSilences(process.env.SAMPLE_WAV_FILE as string, {
+      silenceDuration: 0.2,
+      silenceThreshold: -35,
+    });
     expect(result).toEqual([
       { end: 0.917551, start: 0 },
       { end: 1.50263, start: 1.258957 },
@@ -28,13 +25,10 @@ describe("detectSilences", () => {
   });
 
   it("should detect silences for -35dB for 0.2s for the mp3", async () => {
-    const result = await detectSilences(
-      "https://media.githubusercontent.com/media/ragaeeb/tafrigh/577b870b887b09f806ca3dba67019950981970a5/testing/khutbah.mp3",
-      {
-        silenceDuration: 0.2,
-        silenceThreshold: -35,
-      }
-    );
+    const result = await detectSilences(process.env.SAMPLE_MP3_FILE as string, {
+      silenceDuration: 0.2,
+      silenceThreshold: -35,
+    });
     expect(result).toEqual([{ end: 0.702177, start: 0 }]);
   });
 });

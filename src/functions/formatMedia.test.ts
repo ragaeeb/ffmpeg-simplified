@@ -15,8 +15,7 @@ describe("formatMedia", () => {
 
   beforeEach(() => {
     vi.clearAllMocks(); // Reset all mocks before each test
-    testFilePath =
-      "https://d38nvwmjovqyq6.cloudfront.net/va90web25003/companions/ws_smith/18%20Double%20Consonants.mp3";
+    testFilePath = process.env.SAMPLE_MP3_FILE as string;
   });
 
   it("should call ffmpeg with the correct arguments when noiseReduction is enabled with custom options", async () => {
@@ -105,7 +104,7 @@ describe("formatMedia", () => {
     expect(result).toBe(true);
 
     const duration = await getMediaDuration(testFilePath);
-    expect(duration).toBeCloseTo(22.256, 3);
+    expect(duration).toBeCloseTo(33.5935, 3);
   });
 
   it("should call ffmpeg with the correct arguments when noiseReduction is enabled with default options", async () => {

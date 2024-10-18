@@ -18,7 +18,6 @@ export const slice = async (
   const fileName = path.basename(file, path.extname(file)); // e.g., "a" from "a.mp4"
   const fileExtension = path.extname(file); // e.g., ".mp4"
 
-  // Process each range
   for (let i = 0; i < options.ranges.length; i++) {
     const { start, end } = options.ranges[i];
     const outputFile = path.join(
