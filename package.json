@@ -1,6 +1,6 @@
 {
   "name": "ffmpeg-simplified",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A wrapper around ffmpeg to achieve tasks via simple APIs.",
   "main": "dist/main.js",
   "types": "dist/index.d.ts",
@@ -19,8 +19,7 @@
     "deepmerge": "^4.3.1",
     "ffmpeg-static": "^5.2.0",
     "fluent-ffmpeg": "^2.1.3",
-    "pino": "^9.5.0",
-    "pino-pretty": "^11.3.0"
+    "pino": "^9.5.0"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
@@ -29,10 +28,10 @@
     "@semantic-release/changelog": "^6.0.3",
     "@types/fluent-ffmpeg": "^2.1.26",
     "@types/jsonstream-next": "^3.0.3",
-    "@types/node": "^22.7.6",
+    "@types/node": "^22.7.7",
     "@vitest/coverage-v8": "^2.1.3",
     "parcel": "^2.12.0",
-    "semantic-release": "^24.1.2",
+    "semantic-release": "^24.1.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "vitest": "^2.1.3"

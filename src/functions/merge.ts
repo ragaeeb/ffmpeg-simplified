@@ -32,7 +32,6 @@ export const mergeSlices = async (
         .inputOptions(["-f concat", "-safe 0"])
         .outputOptions(["-c copy"])
         .output(outputFile)
-        .output(outputFile)
         .on("end", () => {
           logger.info(`Merged video saved as ${outputFile}`);
           resolve();

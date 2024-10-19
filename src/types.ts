@@ -178,3 +178,44 @@ export type AudioChunk = {
    */
   range: TimeRange;
 };
+
+export interface CropOptions {
+  top?: number; // Percentage to crop from the top (0-100)
+  bottom?: number; // Percentage to crop from the bottom (0-100)
+  left?: number; // Percentage to crop from the left (0-100)
+  right?: number; // Percentage to crop from the right (0-100)
+}
+
+export enum CropPreset {
+  HorizontallyCenteredText = "HorizontallyCenteredText",
+  VerticallyCenteredText = "VerticallyCenteredText",
+  BottomText = "BottomText",
+  TopText = "TopText",
+}
+
+export enum FramePreprocessingPreset {
+  DarkTextOnLightBackground = "DarkTextOnLightBackground",
+  LightTextOnDarkBackground = "LightTextOnDarkBackground",
+}
+
+export interface FramePreprocessingOptions {
+  preset?: FramePreprocessingPreset;
+  contrast?: number;
+  brightness?: number;
+  threshold?: number;
+  grayscale?: boolean;
+}
+
+export type GetFramesOptions = {
+  frequency: number; // in seconds
+  cropOptions?: CropPreset | CropOptions;
+  preprocessingOptions?: FramePreprocessingOptions | FramePreprocessingPreset;
+  outputFolder: string; // Output directory for the screenshots files.
+  filePrefix?: string;
+  fileExtension?: string;
+};
+
+export type Frame = {
+  filename: string;
+  start: number;
+};
