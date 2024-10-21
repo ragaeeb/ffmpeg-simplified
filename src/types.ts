@@ -206,6 +206,7 @@ export interface FramePreprocessingOptions {
   grayscale?: boolean;
 }
 
+/** Options for the getFrames function. */
 export type GetFramesOptions = {
   frequency: number; // in seconds
   cropOptions?: CropPreset | CropOptions;
