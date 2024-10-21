@@ -39,16 +39,16 @@ export const collectFramePaths = async (
   extension: string,
   frequency: number
 ): Promise<Frame[]> => {
-  const files = (await fs.readdir(folder)).filter(
-    (file) => file.startsWith(prefix) && file.endsWith(extension)
-  );
+  const frames: Frame[] = (await fs.readdir(folder))
+    .filter(
+      (file: string) => file.startsWith(prefix) && file.endsWith(extension)
+    )
+    .map((file: string) => {
+      const filename = path.join(folder, file);
+      const frameNumber = file.replace(prefix, "").replace(extension, "");
 
-  const frames: Frame[] = files.map((file) => {
-    const filename = path.join(folder, file);
-    const frameNumber = file.replace(prefix, "").replace(extension, "");
-
-    return { filename, start: Number.parseInt(frameNumber, 10) * frequency };
-  });
+      return { filename, start: Number.parseInt(frameNumber, 10) * frequency };
+    });
 
   return frames.sort((a, b) => a.start - b.start);
 };
