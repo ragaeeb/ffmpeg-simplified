@@ -1,6 +1,4 @@
-import { randomUUID } from "node:crypto";
 import ffmpeg from "fluent-ffmpeg";
-import path from "node:path";
 import type { Readable } from "node:stream";
 import type {
   NoiseReductionOptions,
@@ -9,6 +7,7 @@ import type {
 } from "../types";
 import logger from "../utils/logger";
 import { NOISE_REDUCTION_OPTIONS_DEFAULTS } from "./constants";
+import os from "node:os";
 
 const buildConversionFilters = ({
   afftdn_nf,
@@ -46,14 +45,11 @@ const buildConversionFilters = ({
  */
 export const formatMedia = async (
   input: Readable | string,
-  outputDir: string,
+  outputPath: string,
   options?: PreprocessOptions,
   callbacks?: PreprocessingCallbacks
 ): Promise<string> => {
-  const outputPath = path.join(outputDir, `${randomUUID()}.mp3`);
-  logger.debug(
-    `formatMedia: ${input}, outputDir: ${outputDir}, outputPath: ${outputPath}`
-  );
+  logger.debug(`formatMedia: ${input}, outputPath: ${outputPath}`);
 
   if (callbacks?.onPreprocessingStarted) {
     await callbacks.onPreprocessingStarted(outputPath);
@@ -71,6 +67,12 @@ export const formatMedia = async (
       command = command.audioFilters(filters);
     }
 
+    if (options?.fast) {
+      const maxThreads = os.cpus().length;
+      command = command.outputOptions([`-threads ${maxThreads}`]);
+      logger.debug(`Using fast mode with ${maxThreads} threads`);
+    }
+
     logger.debug(`saveTo: ${outputPath}`);
 
     command
@@ -84,7 +86,7 @@ export const formatMedia = async (
         }
       })
       .on("end", async () => {
-        logger.info(`Formatted file: ${outputPath}`);
+        logger.debug(`Formatted file: ${outputPath}`);
 
         if (callbacks?.onPreprocessingFinished) {
           await callbacks.onPreprocessingFinished(outputPath);

@@ -9,3 +9,4 @@ export * from "./functions/replaceAudio";
 export * from "./functions/slice";
 export * from "./functions/splitFileOnSilences";
 export * from "./functions/sliceAndMerge";
+export * from "./utils/io";

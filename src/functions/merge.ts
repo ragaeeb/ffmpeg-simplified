@@ -4,6 +4,7 @@ import logger from "../utils/logger";
 import os from "node:os";
 import { generateHashFromInputFiles } from "../utils/io";
 import path from "node:path";
+import type { MergeOptions } from "../types";
 
 /**
  * Merges multiple media files into a single output file.
@@ -14,7 +15,8 @@ import path from "node:path";
  */
 export const mergeSlices = async (
   inputFiles: string[],
-  outputFile: string
+  outputFile: string,
+  options: MergeOptions = {}
 ): Promise<string> => {
   const concatFile = path.join(
     os.tmpdir(),
@@ -27,10 +29,15 @@ export const mergeSlices = async (
 
   try {
     await new Promise<void>((resolve, reject) => {
+      const maxThreads = os.cpus().length;
+
       ffmpeg()
         .input(concatFile)
         .inputOptions(["-f concat", "-safe 0"])
-        .outputOptions(["-c copy"])
+        .outputOptions([
+          "-c copy",
+          ...(options.fast ? [`-threads ${maxThreads}`] : []),
+        ])
         .output(outputFile)
         .on("end", () => {
           logger.info(`Merged video saved as ${outputFile}`);

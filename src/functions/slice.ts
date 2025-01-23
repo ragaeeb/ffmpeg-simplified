@@ -2,6 +2,7 @@ import ffmpeg from "fluent-ffmpeg";
 import logger from "../utils/logger";
 import path from "node:path";
 import type { SliceOptions } from "../types";
+import os from "node:os";
 
 /**
  * Slices a media file into multiple parts based on specified time ranges.
@@ -26,10 +27,19 @@ export const slice = async (
     ); // e.g., "a_slice1.mp4"
 
     await new Promise<void>((resolve, reject) => {
-      ffmpeg(file)
+      let command = ffmpeg(file)
         .setStartTime(start)
         .setDuration(end - start)
-        .output(outputFile)
+        .output(outputFile);
+
+      if (options.fast) {
+        command = command.outputOptions([`-threads ${os.cpus().length}`]);
+        logger.debug(
+          `Using fast mode with ${os.cpus().length} threads for slicing`
+        );
+      }
+
+      command
         .on("end", () => {
           logger.info(`Sliced video saved as ${outputFile}`);
           outputFiles.push(outputFile);

@@ -56,6 +56,9 @@ export interface PreprocessOptions {
    * Noise reduction settings.
    */
   noiseReduction?: NoiseReductionOptions | null;
+
+  /** Use the maximum number of threads */
+  fast?: boolean;
 }
 
 /**
@@ -106,6 +109,9 @@ export type SliceOptions = {
    * Output directory for the sliced files.
    */
   outputFolder: string;
+
+  /** Use the maximum number of threads */
+  fast?: boolean;
 };
 
 /**
@@ -116,6 +122,14 @@ export type SliceAndMergeOptions = {
    * Array of time ranges to slice. Can either be in the form of {start: 0, end: 10} or '0-0:10'
    */
   ranges: TimeRange[] | string[];
+
+  /** Use the maximum number of threads */
+  fast?: boolean;
+};
+
+export type MergeOptions = {
+  /** Use the maximum number of threads */
+  fast?: boolean;
 };
 
 /**
