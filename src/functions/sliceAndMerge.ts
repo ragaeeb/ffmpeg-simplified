@@ -4,6 +4,7 @@ import type { SliceAndMergeOptions, TimeRange } from "../types";
 import { createTempDir } from "../utils/io";
 import { promises as fs } from "node:fs";
 import { getMediaDuration } from "./getMediaDuration";
+import os from "node:os";
 
 const parseTimecode = (timecode: string): number => {
   const parts = timecode.split(":").map(Number);
@@ -65,6 +66,7 @@ export const sliceAndMerge = async (
   const chunks = await slice(inputFile, {
     ranges,
     outputFolder: sliceOutputDir,
+    fast: options.fast,
   });
   const merged = await mergeSlices(chunks, outputFile);
 

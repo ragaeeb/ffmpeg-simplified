@@ -11,10 +11,12 @@ import ffmpeg from "fluent-ffmpeg";
 import { formatMedia } from "./formatMedia";
 import { createTempDir, fileExists } from "../utils/io";
 import { getMediaDuration } from "./getMediaDuration";
-import { promises as fs } from "node:fs";
+import fs from "node:fs";
+import path from "node:path";
 
 describe("formatMedia", () => {
   let testFilePath: string;
+  let outputFile: string;
   let outputDir: string;
 
   beforeAll(async () => {
@@ -24,10 +26,11 @@ describe("formatMedia", () => {
   beforeEach(() => {
     vi.clearAllMocks(); // Reset all mocks before each test
     testFilePath = process.env.SAMPLE_MP3_FILE as string;
+    outputFile = path.join(outputDir, "output.mp3");
   });
 
   afterAll(async () => {
-    await fs.rm(outputDir, { recursive: true });
+    await fs.promises.rm(outputDir, { recursive: true });
   });
 
   it("should call ffmpeg with the correct arguments when noiseReduction is enabled with custom options", async () => {
@@ -42,7 +45,7 @@ describe("formatMedia", () => {
     // Run the actual function with noiseReduction enabled with custom values
     await formatMedia(
       testFilePath,
-      outputDir,
+      outputFile,
       {
         noiseReduction: {
           afftdn_nf: -25,
@@ -84,7 +87,7 @@ describe("formatMedia", () => {
     const mockAudioFilters = vi.spyOn(ffmpeg.prototype, "audioFilters");
 
     // Run the actual function with noiseReduction enabled with custom values
-    await formatMedia(testFilePath, outputDir, {
+    await formatMedia(testFilePath, outputFile, {
       noiseReduction: {
         afftdn_nf: null,
         afftdnStart: null,
@@ -102,14 +105,14 @@ describe("formatMedia", () => {
     const mockAudioChannels = vi.spyOn(ffmpeg.prototype, "audioChannels");
     const mockSave = vi.spyOn(ffmpeg.prototype, "save");
 
-    await formatMedia(testFilePath, outputDir);
+    await formatMedia(testFilePath, outputFile);
 
     expect(mockAudioChannels).toHaveBeenCalledWith(1);
     expect(mockSave).toHaveBeenCalled();
   });
 
   it("should correctly output the file", async () => {
-    const outputPath = await formatMedia(testFilePath, outputDir);
+    const outputPath = await formatMedia(testFilePath, outputFile);
 
     const result = await fileExists(outputPath);
     expect(result).toBe(true);
@@ -121,7 +124,9 @@ describe("formatMedia", () => {
   it("should call ffmpeg with the correct arguments when noiseReduction is enabled with default options", async () => {
     const mockAudioFilters = vi.spyOn(ffmpeg.prototype, "audioFilters");
 
-    await formatMedia(testFilePath, outputDir, { noiseReduction: {} });
+    await formatMedia(testFilePath, outputFile, {
+      noiseReduction: {},
+    });
 
     expect(mockAudioFilters).toHaveBeenCalledWith([
       "highpass=f=300",
@@ -133,13 +138,83 @@ describe("formatMedia", () => {
     ]);
   });
 
+  it("should call ffmpeg with the max number of threads", async () => {
+    const mockOutputOptions = vi.spyOn(ffmpeg.prototype, "outputOptions");
+
+    await formatMedia(testFilePath, outputFile, {
+      fast: true,
+    });
+
+    expect(mockOutputOptions).toHaveBeenCalledWith([
+      expect.stringMatching(/-threads \d+/),
+    ]);
+  });
+
   it("should call ffmpeg with the correct arguments when noiseReduction is disabled", async () => {
-    await formatMedia(testFilePath, outputDir, { noiseReduction: null });
+    await formatMedia(testFilePath, outputFile, { noiseReduction: null });
     expect(ffmpeg.prototype.audioFilters).not.toHaveBeenCalled();
   });
 
   it("should call ffmpeg with the correct arguments when noiseReduction is not provided (default to false)", async () => {
-    await formatMedia(testFilePath, outputDir);
+    await formatMedia(testFilePath, outputFile);
     expect(ffmpeg.prototype.audioFilters).toHaveBeenCalled();
+  });
+
+  it("should process input as a stream and call ffmpeg with correct arguments", async () => {
+    const mockAudioFilters = vi.spyOn(ffmpeg.prototype, "audioFilters");
+
+    const callbacks = {
+      onPreprocessingFinished: vi.fn().mockResolvedValue(null),
+      onPreprocessingProgress: vi.fn(),
+      onPreprocessingStarted: vi.fn().mockResolvedValue(null),
+    };
+
+    const fileStream = fs.createReadStream(testFilePath);
+
+    // Run the function using the stream as input
+    const outputPath = await formatMedia(
+      fileStream,
+      outputFile,
+      {
+        noiseReduction: {
+          afftdn_nf: -25,
+          afftdnStart: 0.5,
+          afftdnStop: 2,
+          dialogueEnhance: true,
+          highpass: 250,
+          lowpass: 3500,
+        },
+      },
+      callbacks
+    );
+
+    // Verify the output file exists
+    const result = await fileExists(outputPath);
+    expect(result).toBe(true);
+
+    // Check that ffmpeg was called with the correct arguments
+    expect(mockAudioFilters).toHaveBeenCalledWith([
+      "highpass=f=250",
+      "asendcmd=0.5 afftdn sn start",
+      "asendcmd=2 afftdn sn stop",
+      "afftdn=nf=-25",
+      "dialoguenhance",
+      "lowpass=f=3500",
+    ]);
+
+    // Ensure callbacks were invoked correctly
+    expect(callbacks.onPreprocessingStarted).toHaveBeenCalledOnce();
+    expect(callbacks.onPreprocessingStarted).toHaveBeenCalledWith(
+      expect.any(String)
+    );
+
+    expect(callbacks.onPreprocessingProgress).toHaveBeenCalledWith(
+      expect.any(Number)
+    );
+
+    expect(callbacks.onPreprocessingFinished).toHaveBeenCalledOnce();
+    expect(callbacks.onPreprocessingFinished).toHaveBeenCalledWith(
+      expect.any(String)
+    );
   });
 });
