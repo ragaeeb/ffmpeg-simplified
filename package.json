@@ -1,6 +1,6 @@
 {
   "name": "ffmpeg-simplified",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A wrapper around ffmpeg to achieve tasks via simple APIs.",
   "main": "dist/main.js",
   "types": "dist/index.d.ts",
@@ -23,19 +23,19 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
-    "@parcel/packager-ts": "^2.13.3",
-    "@parcel/transformer-typescript-types": "^2.13.3",
+    "@parcel/packager-ts": "^2.14.4",
+    "@parcel/transformer-typescript-types": "^2.14.4",
     "@semantic-release/changelog": "^6.0.3",
     "@types/fluent-ffmpeg": "^2.1.27",
-    "@types/node": "^22.10.8",
-    "@vitest/coverage-v8": "^3.0.3",
-    "parcel": "^2.13.3",
-    "semantic-release": "^24.2.1",
-    "typescript": "^5.7.3",
-    "vitest": "^3.0.3"
+    "@types/node": "^22.14.1",
+    "@vitest/coverage-v8": "^3.1.2",
+    "parcel": "^2.14.4",
+    "semantic-release": "^24.2.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "keywords": [
     "ffmpeg",

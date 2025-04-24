@@ -2,7 +2,7 @@
 [![Node.js CI](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml/badge.svg)](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml) ![GitHub License](https://img.shields.io/github/license/ragaeeb/ffmpeg-simplified)
 ![GitHub Release](https://img.shields.io/github/v/release/ragaeeb/ffmpeg-simplified)
 [![codecov](https://codecov.io/gh/ragaeeb/ffmpeg-simplified/graph/badge.svg?token=6B40XM3HNB)](https://codecov.io/gh/ragaeeb/ffmpeg-simplified)
-[![Size](https://deno.bundlejs.com/badge?q=ffmpeg-simplified@2.0.0)](https://bundlejs.com/?q=ffmpeg-simplified%402.0.0)
+[![Size](https://deno.bundlejs.com/badge?q=ffmpeg-simplified@2.0.1)](https://bundlejs.com/?q=ffmpeg-simplified%402.0.1)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label&color=blue)
 ![npm](https://img.shields.io/npm/v/ffmpeg-simplified)
 ![npm](https://img.shields.io/npm/dm/ffmpeg-simplified)
@@ -38,7 +38,7 @@ pnpm i ffmpeg-simplified
 
 ## Requirements
 
-Node.js >= `20.0.0`
+Node.js >= `22.0.0`
 
 Ensure you have `ffmpeg` installed. If not, you can use the `ffmpeg-static` package, which is already included as a dependency.
 

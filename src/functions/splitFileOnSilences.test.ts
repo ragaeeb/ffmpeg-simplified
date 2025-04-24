@@ -9,7 +9,7 @@ import {
 import { getMediaDuration } from "./getMediaDuration";
 import { createTempDir } from "../utils/io";
 
-describe("splitOnSilence", () => {
+describe("splitFileOnSilences", () => {
   describe("mapSilenceResultsToChunkRanges", () => {
     it("should map silences to correct chunk ranges for a single chunk scenario", () => {
       const silenceResults: TimeRange[] = [];
@@ -147,6 +147,91 @@ describe("splitOnSilence", () => {
       );
 
       expect(result).toEqual([{ end: 33.645714, start: 0 }]);
+    });
+
+    it("should filter out pure silence", () => {
+      const silenceResults: TimeRange[] = [
+        { end: 0.81746, start: 0 },
+        { end: 8.354966, start: 7.61737 },
+        { end: 15.490794, start: 14.979592 },
+        { end: 19.106621, start: 18.758458 },
+        { end: 24.567075, start: 24.334376 },
+        { end: 28.420635, start: 28.103855 },
+      ];
+
+      const chunkDuration = 60;
+      const totalDuration = 33.645714;
+
+      const result = mapSilenceResultsToChunkRanges(
+        silenceResults,
+        chunkDuration,
+        totalDuration
+      );
+
+      expect(result).toEqual([{ end: 33.645714, start: 0 }]);
+    });
+
+    it("should skip chunks that are entirely silent in the middle", () => {
+      const silenceResults: TimeRange[] = [
+        // silence from 10s → 20s
+        { start: 10, end: 20 },
+      ];
+      const chunkDuration = 10;
+      const totalDuration = 30;
+
+      const result = mapSilenceResultsToChunkRanges(
+        silenceResults,
+        chunkDuration,
+        totalDuration
+      );
+
+      // the 10–20 chunk is pure silence, so we only get 0–10 and 20–30
+      expect(result).toEqual([
+        { start: 0, end: 10 },
+        { start: 20, end: 30 },
+      ]);
+    });
+
+    it("should skip a silent chunk at the very start", () => {
+      const silenceResults: TimeRange[] = [
+        // silence from 0s → 5s
+        { start: 0, end: 5 },
+      ];
+      const chunkDuration = 5;
+      const totalDuration = 15;
+
+      const result = mapSilenceResultsToChunkRanges(
+        silenceResults,
+        chunkDuration,
+        totalDuration
+      );
+
+      // 0–5 is silent and removed, so we get 5–10 and 10–15
+      expect(result).toEqual([
+        { start: 5, end: 10 },
+        { start: 10, end: 15 },
+      ]);
+    });
+
+    it("should skip a silent chunk at the very end", () => {
+      const silenceResults: TimeRange[] = [
+        // silence from 20s → 30s
+        { start: 20, end: 30 },
+      ];
+      const chunkDuration = 10;
+      const totalDuration = 30;
+
+      const result = mapSilenceResultsToChunkRanges(
+        silenceResults,
+        chunkDuration,
+        totalDuration
+      );
+
+      // 20–30 is silent and removed, so we only get 0–10 and 10–20
+      expect(result).toEqual([
+        { start: 0, end: 10 },
+        { start: 10, end: 20 },
+      ]);
     });
   });
 

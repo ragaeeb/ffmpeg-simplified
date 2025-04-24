@@ -15,31 +15,56 @@ import deepmerge from "deepmerge";
 import { getMediaDuration } from "./getMediaDuration";
 import { detectSilences } from "./detectSilences";
 
+/**
+ * Splits an audio timeline into non-silent "voice" segments by dividing
+ * the total duration into fixed-size chunks and trimming off purely silent parts.
+ *
+ * @param {TimeRange[]} silenceResults - Detected silence intervals (in seconds).
+ * @param {number} chunkDuration - Maximum duration (in seconds) for each chunk.
+ * @param {number} totalDuration - Total duration (in seconds) of the audio.
+ * @returns {TimeRange[]} Array of non-silent time ranges representing voice segments.
+ */
 export const mapSilenceResultsToChunkRanges = (
   silenceResults: TimeRange[],
   chunkDuration: number,
   totalDuration: number
 ): TimeRange[] => {
+  // if the chunk size exceeds the whole audio, just return the full range
   if (chunkDuration >= totalDuration) {
-    return [{ end: totalDuration, start: 0 }];
+    return [{ start: 0, end: totalDuration }];
   }
 
   const chunks: TimeRange[] = [];
   let currentStart = 0;
 
+  // helper: returns true if [start,end] is wholly inside any silence range
+  const isFullySilent = (start: number, end: number) =>
+    silenceResults.some((s) => start >= s.start && end <= s.end);
+
   while (currentStart < totalDuration) {
     const chunkEnd = Math.min(currentStart + chunkDuration, totalDuration);
+
+    // find any silences that begin inside this chunk
     const relevantSilences = silenceResults
       .filter((s) => s.start > currentStart && s.start <= chunkEnd)
       .sort((a, b) => b.start - a.start);
 
+    const segStart = currentStart;
+    let segEnd: number;
+
     if (relevantSilences.length > 0) {
-      const lastSilenceInChunk = relevantSilences[0];
-      chunks.push({ end: lastSilenceInChunk.start, start: currentStart });
-      currentStart = lastSilenceInChunk.start;
+      // cut off at the start of the last silence in this chunk
+      segEnd = relevantSilences[0].start;
+      currentStart = relevantSilences[0].start;
     } else {
-      chunks.push({ end: chunkEnd, start: currentStart });
+      // no silence begins in here: take the full chunk
+      segEnd = chunkEnd;
       currentStart = chunkEnd;
+    }
+
+    // only keep it if it's non-zero length and not purely silent
+    if (segEnd > segStart && !isFullySilent(segStart, segEnd)) {
+      chunks.push({ start: segStart, end: segEnd });
     }
   }
 
@@ -85,6 +110,7 @@ export const splitFileOnSilences = async (
     silenceDuration,
     silenceThreshold,
   });
+  console.log("silences", JSON.stringify(silences));
 
   const chunkRanges: TimeRange[] = mapSilenceResultsToChunkRanges(
     silences,
