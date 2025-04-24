@@ -233,6 +233,28 @@ describe("splitFileOnSilences", () => {
         { start: 10, end: 20 },
       ]);
     });
+
+    it("should skip a long silence interval at the beginning efficiently", () => {
+      const silenceResults: TimeRange[] = [
+        { start: 0, end: 15 },
+        { start: 5, end: 7 },
+      ];
+      const chunkDuration = 5;
+      const totalDuration = 25;
+
+      const result = mapSilenceResultsToChunkRanges(
+        silenceResults,
+        chunkDuration,
+        totalDuration
+      );
+
+      // The long initial silence (0–15) covers multiple chunks;
+      // we should jump directly to 15 and then chunk the rest
+      expect(result).toEqual([
+        { start: 15, end: 20 },
+        { start: 20, end: 25 },
+      ]);
+    });
   });
 
   describe("splitFileOnSilences", () => {

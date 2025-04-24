@@ -1,21 +1,35 @@
 import type { SilenceDetectionOptions, TimeRange } from "../types";
 import ffmpeg from "fluent-ffmpeg";
 
-const mapOutputToSilenceResults = (silenceLines: string[]): TimeRange[] => {
+/**
+ * Parses ffmpeg silencedetect output lines into TimeRange objects.
+ * Supports both integer and floating-point values, and skips invalid or degenerate intervals.
+ */
+export const mapOutputToSilenceResults = (
+  silenceLines: string[]
+): TimeRange[] => {
   const silences: TimeRange[] = [];
-  let currentSilenceStart: null | number = null;
+  let currentSilenceStart: number | null = null;
 
   for (const line of silenceLines) {
     if (line.includes("silence_start")) {
-      currentSilenceStart = Number.parseFloat(
-        line.match(/silence_start: (\d+\.\d+)/)?.[1] || "0"
-      );
+      const match = line.match(/silence_start: (\d+(?:\.\d+)?)/);
+      if (match) {
+        const parsed = parseFloat(match[1]);
+        currentSilenceStart = !isNaN(parsed) ? parsed : null;
+      } else {
+        currentSilenceStart = null;
+      }
     } else if (line.includes("silence_end") && currentSilenceStart !== null) {
-      const silenceEnd = Number.parseFloat(
-        line.match(/silence_end: (\d+\.\d+)/)?.[1] || "0"
-      );
-      silences.push({ end: silenceEnd, start: currentSilenceStart });
-      currentSilenceStart = null; // Reset for the next detection
+      const match = line.match(/silence_end: (\d+(?:\.\d+)?)/);
+      if (match) {
+        const silenceEnd = parseFloat(match[1]);
+        // only add if valid and end > start
+        if (!isNaN(silenceEnd) && silenceEnd > currentSilenceStart) {
+          silences.push({ start: currentSilenceStart, end: silenceEnd });
+        }
+      }
+      currentSilenceStart = null;
     }
   }
 

@@ -110,15 +110,12 @@ export const splitFileOnSilences = async (
     silenceDuration,
     silenceThreshold,
   });
-  console.log("silences", JSON.stringify(silences));
 
   const chunkRanges: TimeRange[] = mapSilenceResultsToChunkRanges(
     silences,
     chunkDuration,
     totalDuration
   ).filter((r) => r.end - r.start > chunkMinThreshold);
-
-  logger.debug(chunkRanges, "chunkRanges");
 
   const chunks: AudioChunk[] = chunkRanges.map((range, index) => ({
     filename: path.format({
