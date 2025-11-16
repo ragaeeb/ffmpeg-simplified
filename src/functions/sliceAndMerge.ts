@@ -5,6 +5,12 @@ import { createTempDir } from "../utils/io";
 import { promises as fs } from "node:fs";
 import { getMediaDuration } from "./getMediaDuration";
 
+/**
+ * Converts a HH:MM:SS.sss style timecode into a floating point second value.
+ *
+ * @param {string} timecode - The string based timecode (supports hours, minutes and seconds).
+ * @returns {number} The parsed value expressed in seconds.
+ */
 const parseTimecode = (timecode: string): number => {
   const parts = timecode.split(":").map(Number);
   let seconds = 0;
@@ -20,6 +26,12 @@ const parseTimecode = (timecode: string): number => {
   return seconds;
 };
 
+/**
+ * Normalises human readable timecode ranges into {@link TimeRange} objects.
+ *
+ * @param {string[]} timeCodeRanges - Ranges in the form `start-end` using timecode notation.
+ * @returns {TimeRange[]} Parsed time ranges ready for slicing.
+ */
 const mapTimeCodeRangesToTimeRanges = (
   timeCodeRanges: string[]
 ): TimeRange[] => {

@@ -1,4 +1,4 @@
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "../vendor/ffmpegy";
 
 /**
  * Retrieves the duration of a media file in seconds.
@@ -11,7 +11,13 @@ export const getMediaDuration = async (filePath: string): Promise<number> => {
     ffmpeg.ffprobe(filePath, (err, metadata) => {
       if (err) return reject(err);
 
-      resolve(metadata.format.duration || 0); // Return duration in seconds
+      const rawDuration = metadata.format.duration ?? 0;
+      const parsed =
+        typeof rawDuration === "number"
+          ? rawDuration
+          : parseFloat(String(rawDuration));
+
+      resolve(Number.isFinite(parsed) ? parsed : 0);
     });
   });
 };

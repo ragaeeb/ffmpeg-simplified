@@ -6,7 +6,7 @@ import {
   beforeAll,
   beforeEach,
   afterAll,
-} from "vitest";
+} from "bun:test";
 import { createTempDir } from "../utils/io";
 import { promises as fs } from "node:fs";
 import path from "node:path";

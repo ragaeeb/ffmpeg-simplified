@@ -1,240 +1,122 @@
-[![wakatime](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/85351d0a-8696-4af7-9b7a-ff95ace66306.svg)](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/85351d0a-8696-4af7-9b7a-ff95ace66306)
-[![Node.js CI](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml/badge.svg)](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml) ![GitHub License](https://img.shields.io/github/license/ragaeeb/ffmpeg-simplified)
-![GitHub Release](https://img.shields.io/github/v/release/ragaeeb/ffmpeg-simplified)
-[![codecov](https://codecov.io/gh/ragaeeb/ffmpeg-simplified/graph/badge.svg?token=6B40XM3HNB)](https://codecov.io/gh/ragaeeb/ffmpeg-simplified)
-[![Size](https://deno.bundlejs.com/badge?q=ffmpeg-simplified@2.0.1)](https://bundlejs.com/?q=ffmpeg-simplified%402.0.1)
-![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label&color=blue)
-![npm](https://img.shields.io/npm/v/ffmpeg-simplified)
-![npm](https://img.shields.io/npm/dm/ffmpeg-simplified)
-![GitHub issues](https://img.shields.io/github/issues/ragaeeb/ffmpeg-simplified)
-![GitHub stars](https://img.shields.io/github/stars/ragaeeb/ffmpeg-simplified?style=social)
-
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=bugs)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ragaeeb_ffmpeg-simple&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=ragaeeb_ffmpeg-simple)
-
 # ffmpeg-simplified
 
-`ffmpeg-simplified` is a simple wrapper around `ffmpeg` designed to simplify common audio and video processing tasks through easy-to-use APIs.
+[![wakatime](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/85351d0a-8696-4af7-9b7a-ff95ace66306.svg)](https://wakatime.com/badge/user/a0b906ce-b8e7-4463-8bce-383238df6d4b/project/85351d0a-8696-4af7-9b7a-ff95ace66306)
+[![Node.js CI](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml/badge.svg)](https://github.com/ragaeeb/ffmpeg-simplified/actions/workflows/build.yml)
+![GitHub License](https://img.shields.io/github/license/ragaeeb/ffmpeg-simplified)
+![GitHub Release](https://img.shields.io/github/v/release/ragaeeb/ffmpeg-simplified)
+[![codecov](https://codecov.io/gh/ragaeeb/ffmpeg-simplified/graph/badge.svg?token=6B40XM3HNB)](https://codecov.io/gh/ragaeeb/ffmpeg-simplified)
+![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label&color=blue)
+![bun](https://img.shields.io/badge/runtime-bun-%23000000)
 
-## Installation
+`ffmpeg-simplified` is a batteries-included toolkit around the in-repo [`ffmpegy`](src/vendor/ffmpegy.ts) bindings. It exposes an ergonomic, Promise-based API for everyday audio and video automation tasks while leaning on your locally installed `ffmpeg` binary.
 
-To install ffmpeg-simplified, use npm or yarn:
+## Features
 
-```bash
-npm install ffmpeg-simplified
-# or
-yarn add ffmpeg-simplified
-# or
-pnpm i ffmpeg-simplified
-```
+- ✅ Zero-configuration access to common `ffmpeg` workflows (noise reduction, slicing, merging, frame capture, audio swapping and more).
+- ✅ Written in TypeScript with rich type definitions and detailed JSDoc comments for every function.
+- ✅ Ships prebuilt bundles via [`tsdown`](https://github.com/privatenumber/tsdown) and targets modern Node/Bun runtimes.
+- ✅ Test suite powered by [`bun test`](https://bun.sh/docs/test) and real media fixtures to ensure behaviour parity with `ffmpeg`.
 
 ## Requirements
 
-Node.js >= `22.0.0`
+- Node.js ≥ **22.0.0** or Bun ≥ **1.0**.
+- A working `ffmpeg` installation available on your `PATH`. The package intentionally avoids bundling `ffmpeg-static` so that you can manage codecs and updates yourself.
+- Optional: set `FFMPEG_PATH` and/or `FFPROBE_PATH` environment variables if the binaries live somewhere other than your shell `PATH`.
 
-Ensure you have `ffmpeg` installed. If not, you can use the `ffmpeg-static` package, which is already included as a dependency.
+### Built-in `ffmpegy`
 
-## Usage
+The [`src/vendor/ffmpegy.ts`](src/vendor/ffmpegy.ts) helper is a minimal event-driven wrapper that shells out to the locally installed `ffmpeg` and `ffprobe` executables. It mimics the small Fluent-FFmpeg subset that this project relied on—methods such as `audioFilters`, `inputOptions`, `setStartTime`, `setDuration` and event hooks like `progress`, `stderr`, `end`, and `error` all behave the same. The helper also:
 
-The SDK provides several functions to interact with the turath.io API. Below are the main functions that you can use:
+- Streams `Readable` inputs into temporary files and cleans them up automatically.
+- Emits deterministic progress callbacks (including a final 100% event) so callbacks fire even on short clips.
+- Allows overriding the binary paths via `FFMPEG_PATH`/`FFPROBE_PATH` for custom installations.
 
-### Importing the SDK
+## Installation
 
-```javascript
+Install with your preferred package manager:
+
+```bash
+bun add ffmpeg-simplified
+# or
+npm install ffmpeg-simplified
+# or
+yarn add ffmpeg-simplified
+```
+
+## Quick start
+
+```ts
 import {
-  sliceAndMerge,
-  slice,
-  mergeSlices,
-  splitFileOnSilences,
-  replaceAudio,
-  formatMedia,
   detectSilences,
+  formatMedia,
+  getFrames,
   getMediaDuration,
+  getVideoDimensions,
+  mergeSlices,
+  replaceAudio,
+  slice,
+  sliceAndMerge,
+  splitFileOnSilences,
 } from "ffmpeg-simplified";
-```
 
-### detectSilences
-
-Detects silences in an audio file based on specified threshold and duration.
-
-```javascript
-const silences = await detectSilences("audio.mp3", {
-  silenceDuration: 0.5,
-  silenceThreshold: -50,
+const duration = await getMediaDuration("./samples/interview.mp4");
+const silences = await detectSilences("./samples/interview.wav", {
+  silenceThreshold: -45,
+  silenceDuration: 0.3,
+});
+await formatMedia("./samples/interview.wav", "./output/clean.wav", {
+  fast: true,
+  noiseReduction: { dialogueEnhance: true },
 });
 ```
 
-Parameters:
+## API overview
 
-- filePath (string): Path to the input audio file.
-- options (SilenceDetectionOptions): Silence detection options.
+### `detectSilences(filePath, options)`
+Finds quiet sections in an audio file using `silencedetect`.
 
-Returns:
+### `formatMedia(input, outputPath, options?, callbacks?)`
+Preprocess audio streams (noise reduction, mono downmixing, fast mode, callback hooks).
 
-- Promise<TimeRange[]>: Array of time ranges where silence was detected.
+### `getMediaDuration(filePath)` / `getVideoDimensions(filePath)`
+Lightweight wrappers around `ffprobe` for duration and resolution metadata.
 
-### formatMedia
+### `splitFileOnSilences(filePath, outputDir, options?, callbacks?)`
+Chunk long-form audio into natural speaking segments and normalises short clips.
 
-Preprocesses a media file with options like noise reduction and format conversion.
+### `slice(filePath, options)` / `sliceAndMerge(filePath, outputFile, options)`
+Slice videos by absolute timestamps or human-friendly timecodes, then optionally merge back together.
 
-```javascript
-await formatMedia("input.wav", "./output", {
-  noiseReduction: {
-    highpass: 200,
-    lowpass: 3000,
-    dialogueEnhance: true,
-  },
-});
+### `mergeSlices(inputFiles, outputFile, options?)`
+Concat arbitrary files using the efficient concat demuxer.
+
+### `replaceAudio(videoFile, audioFile, outputFile)`
+Swap a video's audio track without re-encoding the video stream.
+
+### `getFrames(videoFile, options)`
+Extract thumbnails at a fixed cadence with optional cropping and preprocessing presets.
+
+Refer to the inline JSDoc comments for parameter details and return types—every exported function documents accepted options and callback hooks.
+
+## Development
+
+Install dependencies and run the toolchain with Bun:
+
+```bash
+bun install
+bun run build
+bun test
 ```
 
-Parameters:
-
-- input (Readable | string): Input stream or file path.
-- outputDir (string): Directory where the processed file will be saved.
-- options (PreprocessOptions, optional): Preprocessing options.
-- callbacks (PreprocessingCallbacks, optional): Callback functions for progress tracking.
-
-Returns:
-
-- Promise<string>: Path to the processed media file.
-
-### getMediaDuration
-
-Retrieves the duration of a media file in seconds.
-
-```javascript
-const duration = await getMediaDuration("video.mp4");
-console.log(`Duration: ${duration} seconds`);
-```
-
-Parameters:
-
-- filePath (string): Path to the media file.
-
-Returns:
-
-Promise<number>: Duration of the media file in seconds.
-
-### mergeSlices
-
-Merges multiple media files into a single file.
-
-```javascript
-await mergeSlices(["slice1.mp4", "slice2.mp4"], "mergedOutput.mp4");
-```
-
-Parameters:
-
-- inputFiles (string[]): Array of media file paths to merge.
-- outputFile (string): Path where the merged file will be saved.
-
-Returns:
-
-- Promise<string>: Path to the merged output file.
-
-### replaceAudio
-
-Replaces the audio track of a video file with a new audio file.
-
-```javascript
-await replaceAudio("video.mp4", "newAudio.mp3", "outputVideo.mp4");
-```
-
-Parameters:
-
-- videoFile (string): Path to the input video file.
-- audioFile (string): Path to the new audio file.
-- outputFile (string): Path where the output video will be saved.
-
-Returns:
-
-Promise<string>: Path to the output video file.
-
-### slice
-
-Slices a media file into multiple parts based on specified time ranges.
-
-```javascript
-const slices = await slice("input.mp4", {
-  ranges: [
-    { start: 0, end: 60 },
-    { start: 120, end: 180 },
-  ],
-  outputFolder: "./slices",
-});
-
-console.log(slices); // ["./slices/input_0.mp4", "./slices/input_1.mp4"]
-```
-
-Parameters:
-
-- file (string): Path to the input media file.
-- options (SliceOptions): Options containing the time ranges and output folder.
-
-Returns:
-
-- Promise<string[]>: Array of paths to the sliced files.
-
-### sliceAndMerge
-
-Slices a media file based on specified time ranges and merges the slices into a single file.
-
-```javascript
-await sliceAndMerge("input.mp4", "output.mp4", {
-  ranges: [
-    { start: 0, end: 60 },
-    { start: 120, end: 180 },
-  ],
-});
-```
-
-Parameters:
-
-- inputFile (string): Path to the input media file.
-- outputFile (string): Path where the output file will be saved.
-- options (SliceAndMergeOptions): Options containing the time ranges.
-
-Returns:
-
-- Promise<string>: Path to the merged output file.
-
-### splitFileOnSilences
-
-Splits an audio file into chunks based on silence detection.
-
-```javascript
-const chunks = await splitFileOnSilences("audio.mp3", "./chunks", {
-  chunkDuration: 60,
-  silenceDetection: {
-    silenceDuration: 0.5,
-    silenceThreshold: -50,
-  },
-});
-```
-
-Parameters:
-
-- filePath (string): Path to the input audio file.
-- outputDir (string): Directory where the chunks will be saved.
-- options (SplitOptions, optional): Split options.
-- callbacks (SplitOnSilenceCallbacks, optional): Callback functions for progress tracking.
-
-Returns:
-
-- Promise<AudioChunk[]>: Array of audio chunks with file names and time ranges.
+- **Builds** are handled by `tsdown`, producing ESM output and declaration files in `dist/`.
+- **Tests** rely on Bun's native test runner and preload `setupTests.ts` to expose fixture paths (`testing/sample.*`). The suite exercises real audio/video transformations, so ensure `ffmpeg` and `ffprobe` binaries are reachable.
 
 ## Contributing
 
-If you'd like to contribute to the SDK, feel free to fork the repository and submit a pull request. Contributions are welcome!
+1. Fork the repo and create a feature branch.
+2. Install dependencies with `bun install`.
+3. Run `bun test` and `bun run build` before submitting a pull request.
 
 ## License
 
-This SDK is licensed under the MIT License.
+MIT © Ragaeeb Haq

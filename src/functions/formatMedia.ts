@@ -1,4 +1,4 @@
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "../vendor/ffmpegy";
 import type { Readable } from "node:stream";
 import type {
   NoiseReductionOptions,
@@ -9,6 +9,12 @@ import logger from "../utils/logger";
 import { NOISE_REDUCTION_OPTIONS_DEFAULTS } from "./constants";
 import os from "node:os";
 
+/**
+ * Maps the provided noise reduction configuration into ffmpeg audio filter expressions.
+ *
+ * @param {NoiseReductionOptions} options - Noise reduction tuning values.
+ * @returns {string[]} ffmpeg audio filter definitions.
+ */
 const buildConversionFilters = ({
   afftdn_nf,
   afftdnStart,
@@ -38,7 +44,7 @@ const buildConversionFilters = ({
  * Preprocesses a media file with options like noise reduction and format conversion.
  *
  * @param {Readable | string} input - Input stream or file path.
- * @param {string} outputDir - Directory where the processed file will be saved.
+ * @param {string} outputPath - Destination path where the processed file will be written.
  * @param {PreprocessOptions} [options] - Optional preprocessing options.
  * @param {PreprocessingCallbacks} [callbacks] - Optional callbacks for progress tracking.
  * @returns {Promise<string>} - Promise resolving to the path of the processed media file.

@@ -1,5 +1,5 @@
 import { replaceAudio } from "./replaceAudio";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "bun:test";
 import { promises as fs } from "node:fs";
 
 import { createTempDir } from "../utils/io";

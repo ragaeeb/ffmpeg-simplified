@@ -18,6 +18,12 @@ const preprocessingPresets: Record<
   },
 };
 
+/**
+ * Maps preprocessing options to the ffmpeg filter graph used during frame extraction.
+ *
+ * @param {FramePreprocessingOptions | FramePreprocessingPreset} options - Either a named preset or manual preprocessing flags.
+ * @returns {string} ffmpeg filter expression representing the preprocessing steps.
+ */
 export const mapFramePreprocessingToFilter = (
   options: FramePreprocessingOptions | FramePreprocessingPreset
 ): string => {
@@ -30,8 +36,11 @@ export const mapFramePreprocessingToFilter = (
 /**
  * Collects frame file paths and extracts timestamps from filenames.
  *
- * @param folder - Folder containing the extracted frames.
- * @returns Promise resolving to an array of objects with file paths and timestamps.
+ * @param {string} folder - Folder containing the extracted frames.
+ * @param {string} prefix - Filename prefix used when writing frames.
+ * @param {string} extension - File extension assigned to frames.
+ * @param {number} frequency - Frame extraction frequency in seconds.
+ * @returns {Promise<Frame[]>} Promise resolving to an array of objects with file paths and timestamps.
  */
 export const collectFramePaths = async (
   folder: string,

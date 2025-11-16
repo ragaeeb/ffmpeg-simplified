@@ -1,4 +1,4 @@
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "../vendor/ffmpegy";
 import logger from "../utils/logger";
 
 /**

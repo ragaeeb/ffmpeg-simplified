@@ -1,4 +1,4 @@
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "../vendor/ffmpegy";
 import type { Frame, GetFramesOptions } from "../types";
 import { getVideoDimensions } from "./getVideoDimensions";
 import { mapCropOptionsToCropFilter } from "../utils/cropping";
@@ -10,10 +10,11 @@ import {
 import path from "node:path";
 
 /**
- * Retrieves the duration of a media file in seconds.
+ * Extracts still frames from a video file and writes them to disk according to the provided options.
  *
- * @param {string} filePath - Path to the media file.
- * @returns {Promise<number>} - Promise resolving to the duration of the media file in seconds.
+ * @param {string} videoFile - Path to the input video file.
+ * @param {GetFramesOptions} options - Extraction options including output folder, frequency and preprocessing choices.
+ * @returns {Promise<Frame[]>} Promise resolving with ordered frame descriptors for the generated images.
  */
 export const getFrames = async (
   videoFile: string,

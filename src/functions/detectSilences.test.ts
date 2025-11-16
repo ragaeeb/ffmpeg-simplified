@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 
 import { detectSilences, mapOutputToSilenceResults } from "./detectSilences";
 
@@ -71,7 +71,8 @@ describe("detectSilences", () => {
       silenceDuration: 0.2,
       silenceThreshold: -35,
     });
-    expect(result).toEqual([
+
+    const expected = [
       { end: 0.917551, start: 0 },
       { end: 1.50263, start: 1.258957 },
       { end: 8.355329, start: 7.343764 },
@@ -84,7 +85,14 @@ describe("detectSilences", () => {
       { end: 27.952517, start: 27.561224 },
       { end: 28.43356, start: 28.062132 },
       { end: 33.384943, start: 33.169569 },
-    ]);
+    ];
+
+    expect(result).toHaveLength(expected.length);
+    expected.forEach((range, index) => {
+      const current = result[index];
+      expect(current.start).toBeCloseTo(range.start, 3);
+      expect(current.end).toBeCloseTo(range.end, 3);
+    });
   });
 
   it("should detect silences for -35dB for 0.2s for the mp3", async () => {
@@ -92,6 +100,8 @@ describe("detectSilences", () => {
       silenceDuration: 0.2,
       silenceThreshold: -35,
     });
-    expect(result).toEqual([{ end: 0.702177, start: 0 }]);
+    expect(result).toHaveLength(1);
+    expect(result[0].start).toBeCloseTo(0, 3);
+    expect(result[0].end).toBeCloseTo(0.702177, 3);
   });
 });

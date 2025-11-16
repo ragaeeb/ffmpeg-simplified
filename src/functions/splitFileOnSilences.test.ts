@@ -1,5 +1,5 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import ffmpeg from "fluent-ffmpeg";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "bun:test";
+import ffmpeg from "../vendor/ffmpegy";
 
 import type { TimeRange } from "../types";
 import {

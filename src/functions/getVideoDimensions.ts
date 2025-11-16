@@ -1,5 +1,11 @@
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "../vendor/ffmpegy";
 
+/**
+ * Retrieves the pixel width and height of the first video stream in a media file.
+ *
+ * @param {string} videoFilePath - Absolute or relative path to the media file to inspect.
+ * @returns {Promise<[number, number]>} Promise resolving with a tuple containing the width and height in pixels.
+ */
 export const getVideoDimensions = (
   videoFilePath: string
 ): Promise<[number, number]> => {

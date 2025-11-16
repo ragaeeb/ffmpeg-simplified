@@ -1,9 +1,13 @@
 import type { SilenceDetectionOptions, TimeRange } from "../types";
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "../vendor/ffmpegy";
+import os from "node:os";
 
 /**
- * Parses ffmpeg silencedetect output lines into TimeRange objects.
+ * Parses ffmpeg silencedetect output lines into {@link TimeRange} objects.
  * Supports both integer and floating-point values, and skips invalid or degenerate intervals.
+ *
+ * @param {string[]} silenceLines - Raw stderr lines emitted by ffmpeg's silencedetect filter.
+ * @returns {TimeRange[]} Normalised silence intervals sorted by appearance order.
  */
 export const mapOutputToSilenceResults = (
   silenceLines: string[]
@@ -50,12 +54,14 @@ export const detectSilences = (
   return new Promise<TimeRange[]>((resolve, reject) => {
     const silenceLines: string[] = [];
 
+    const nullSink = os.platform() === "win32" ? "NUL" : "/dev/null";
+
     ffmpeg(filePath)
       .outputOptions([
         `-af silencedetect=n=${silenceThreshold}dB:d=${silenceDuration}`,
         "-f null",
       ])
-      .output("NUL") // Use '/dev/null' on Unix or 'NUL' on Windows
+      .output(nullSink)
       .on("stderr", (stderrLine: string) => {
         silenceLines.push(stderrLine);
       })

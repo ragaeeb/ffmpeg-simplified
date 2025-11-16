@@ -1,4 +1,4 @@
-import ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "../vendor/ffmpegy";
 import { promises as fs } from "node:fs";
 import logger from "../utils/logger";
 import os from "node:os";
@@ -11,7 +11,8 @@ import type { MergeOptions } from "../types";
  *
  * @param {string[]} inputFiles - Array of paths to the media files to merge.
  * @param {string} outputFile - Path where the merged file will be saved.
- * @returns {Promise<string>} - Promise resolving to the path of the merged output file.
+ * @param {MergeOptions} [options] - Optional settings such as fast mode to control FFmpeg behaviour.
+ * @returns {Promise<string>} Promise resolving to the path of the merged output file.
  */
 export const mergeSlices = async (
   inputFiles: string[],

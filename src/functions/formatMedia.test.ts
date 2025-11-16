@@ -6,8 +6,8 @@ import {
   beforeAll,
   beforeEach,
   afterAll,
-} from "vitest";
-import ffmpeg from "fluent-ffmpeg";
+} from "bun:test";
+import ffmpeg from "../vendor/ffmpegy";
 import { formatMedia } from "./formatMedia";
 import { createTempDir, fileExists } from "../utils/io";
 import { getMediaDuration } from "./getMediaDuration";
