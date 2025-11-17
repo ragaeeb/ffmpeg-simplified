@@ -9,7 +9,7 @@
 
 ## Repository map
 - `src/functions/` houses the public API. Each function should stay small, composable, and fully JSDoc'd.
-- `src/vendor/ffmpegy.ts` is the lightweight wrapper around the locally installed `ffmpeg`/`ffprobe` binaries. Update it instead of reintroducing `ffmpeg-static` or `fluent-ffmpeg`.
+- `src/vendor/ffmpeggy.ts` is the configuration wrapper around the `ffmpeggy` npm package which uses locally installed `ffmpeg`/`ffprobe` binaries.
 - `src/utils/` contains reusable helpers (IO, logging, cropping, preprocessing filters).
 - `testing/` stores real media fixtures; avoid renaming without adjusting `setupTests.ts`.
 
@@ -24,3 +24,13 @@
 - Every exported function must have corresponding unit/integration coverage in `src/**/*.test.ts`.
 - When adding new behaviour, update both the docs (README) and this guide if the workflow changes.
 - If behaviour depends on environment configuration (e.g., custom `FFMPEG_PATH`), document it explicitly.
+
+## FFmpeggy integration
+- The library uses [`ffmpeggy`](https://github.com/mekwall/ffmpeggy) v3.1.3+ as the FFmpeg wrapper
+- Binary detection is handled automatically via `which` in `src/vendor/ffmpeggy.ts`
+- FFmpeggy uses Promise-based APIs—prefer `await ffmpeggy.done()` over callbacks
+- Key patterns:
+  - Create instances: `new FFmpeggy({ input, output, outputOptions })`
+  - Auto-run: Set `autorun: true` to start immediately
+  - Events: `on('progress')`, `on('done')`, `on('error')`
+  - Probe: `await FFmpeggy.probe(filePath)` for metadata

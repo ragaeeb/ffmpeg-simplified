@@ -8,14 +8,15 @@
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label&color=blue)
 ![bun](https://img.shields.io/badge/runtime-bun-%23000000)
 
-`ffmpeg-simplified` is a batteries-included toolkit around the in-repo [`ffmpegy`](src/vendor/ffmpegy.ts) bindings. It exposes an ergonomic, Promise-based API for everyday audio and video automation tasks while leaning on your locally installed `ffmpeg` binary.
+`ffmpeg-simplified` is a batteries-included toolkit built on top of [`ffmpeggy`](https://github.com/mekwall/ffmpeggy). It exposes an ergonomic, Promise-based API for everyday audio and video automation tasks while leaning on your locally installed `ffmpeg` binary.
 
 ## Features
 
-- ✅ Zero-configuration access to common `ffmpeg` workflows (noise reduction, slicing, merging, frame capture, audio swapping and more).
+- ✅ Zero-configuration access to common `ffmpeg` workflows (noise reduction, slicing, merging, frame capture, audio swapping, audio syncing and more).
 - ✅ Written in TypeScript with rich type definitions and detailed JSDoc comments for every function.
 - ✅ Ships prebuilt bundles via [`tsdown`](https://github.com/privatenumber/tsdown) and targets modern Node/Bun runtimes.
 - ✅ Test suite powered by [`bun test`](https://bun.sh/docs/test) and real media fixtures to ensure behaviour parity with `ffmpeg`.
+- ✅ Built on the lightweight and modern [`ffmpeggy`](https://github.com/mekwall/ffmpeggy) wrapper.
 
 ## Requirements
 
@@ -23,13 +24,15 @@
 - A working `ffmpeg` installation available on your `PATH`. The package intentionally avoids bundling `ffmpeg-static` so that you can manage codecs and updates yourself.
 - Optional: set `FFMPEG_PATH` and/or `FFPROBE_PATH` environment variables if the binaries live somewhere other than your shell `PATH`.
 
-### Built-in `ffmpegy`
+### Built with `ffmpeggy`
 
-The [`src/vendor/ffmpegy.ts`](src/vendor/ffmpegy.ts) helper is a minimal event-driven wrapper that shells out to the locally installed `ffmpeg` and `ffprobe` executables. It mimics the small Fluent-FFmpeg subset that this project relied on—methods such as `audioFilters`, `inputOptions`, `setStartTime`, `setDuration` and event hooks like `progress`, `stderr`, `end`, and `error` all behave the same. The helper also:
+The library uses [`ffmpeggy`](https://github.com/mekwall/ffmpeggy), a minimal event-driven wrapper that shells out to locally installed `ffmpeg` and `ffprobe` executables. The wrapper:
 
-- Streams `Readable` inputs into temporary files and cleans them up automatically.
-- Emits deterministic progress callbacks (including a final 100% event) so callbacks fire even on short clips.
-- Allows overriding the binary paths via `FFMPEG_PATH`/`FFPROBE_PATH` for custom installations.
+- Automatically detects system-installed `ffmpeg`/`ffprobe` binaries using the `which` utility
+- Provides a clean Promise-based API with event hooks for progress tracking
+- Supports Node.js streams for input and output
+- Includes built-in FFprobe integration for media analysis
+- Emits detailed progress events during encoding operations
 
 ## Installation
 
@@ -47,6 +50,7 @@ yarn add ffmpeg-simplified
 
 ```ts
 import {
+  delayAudio,
   detectSilences,
   formatMedia,
   getFrames,
@@ -68,9 +72,13 @@ await formatMedia("./samples/interview.wav", "./output/clean.wav", {
   fast: true,
   noiseReduction: { dialogueEnhance: true },
 });
+await delayAudio("./samples/video.mp4", "./output/synced.mp4", 0.5);
 ```
 
 ## API overview
+
+### `delayAudio(inputFile, outputFile, delayInSeconds)`
+Adjusts audio synchronization in a video by applying a delay (positive) or advance (negative) to the audio track.
 
 ### `detectSilences(filePath, options)`
 Finds quiet sections in an audio file using `silencedetect`.

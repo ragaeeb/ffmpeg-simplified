@@ -1,4 +1,4 @@
-import ffmpeg from "../vendor/ffmpegy";
+import { FFmpeggy } from '@/vendor/ffmpeggy';
 
 /**
  * Retrieves the duration of a media file in seconds.
@@ -7,17 +7,9 @@ import ffmpeg from "../vendor/ffmpegy";
  * @returns {Promise<number>} - Promise resolving to the duration of the media file in seconds.
  */
 export const getMediaDuration = async (filePath: string): Promise<number> => {
-  return new Promise((resolve, reject) => {
-    ffmpeg.ffprobe(filePath, (err, metadata) => {
-      if (err) return reject(err);
+    const metadata = await FFmpeggy.probe(filePath);
+    const rawDuration = metadata.format.duration ?? 0;
+    const parsed = typeof rawDuration === 'number' ? rawDuration : parseFloat(String(rawDuration));
 
-      const rawDuration = metadata.format.duration ?? 0;
-      const parsed =
-        typeof rawDuration === "number"
-          ? rawDuration
-          : parseFloat(String(rawDuration));
-
-      resolve(Number.isFinite(parsed) ? parsed : 0);
-    });
-  });
+    return Number.isFinite(parsed) ? parsed : 0;
 };
