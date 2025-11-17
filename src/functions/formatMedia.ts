@@ -1,5 +1,5 @@
+import type { ReadStream } from 'node:fs';
 import os from 'node:os';
-import type { Readable } from 'node:stream';
 import type { Logger, NoiseReductionOptions, PreprocessingCallbacks, PreprocessOptions } from '@/types';
 import { FFmpeggy } from '@/vendor/ffmpeggy';
 import { NOISE_REDUCTION_OPTIONS_DEFAULTS } from './constants';
@@ -35,7 +35,7 @@ const buildConversionFilters = ({
 /**
  * Preprocesses a media file with options like noise reduction and format conversion.
  *
- * @param {Readable | string} input - Input stream or file path.
+ * @param {ReadStream | string} input - Input stream or file path.
  * @param {string} outputPath - Destination path where the processed file will be written.
  * @param {PreprocessOptions} [options] - Optional preprocessing options.
  * @param {PreprocessingCallbacks} [callbacks] - Optional callbacks for progress tracking.
@@ -43,7 +43,7 @@ const buildConversionFilters = ({
  * @returns {Promise<string>} - Promise resolving to the path of the processed media file.
  */
 export const formatMedia = async (
-    input: Readable | string,
+    input: ReadStream | string,
     outputPath: string,
     options?: PreprocessOptions,
     callbacks?: PreprocessingCallbacks,
@@ -95,11 +95,14 @@ export const formatMedia = async (
                     callbacks.onPreprocessingProgress(progress.percent);
                 }
             })
-            .on('done', async () => {
+            .on('done', () => {
                 logger?.debug?.(`Formatted file: ${outputPath}`);
 
                 if (callbacks?.onPreprocessingFinished) {
-                    await callbacks.onPreprocessingFinished(outputPath);
+                    // Fire and forget - don't block on callback completion
+                    callbacks.onPreprocessingFinished(outputPath).catch((err) => {
+                        logger?.error?.(`Error in onPreprocessingFinished callback: ${err}`);
+                    });
                 }
 
                 resolve(outputPath);

@@ -2,7 +2,6 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'bun:t
 import fs from 'node:fs';
 import path from 'node:path';
 import { createTempDir, fileExists } from '../utils/io';
-import { FFmpeggy } from '../vendor/ffmpeggy';
 import { formatMedia } from './formatMedia';
 import { getMediaDuration } from './getMediaDuration';
 
@@ -53,7 +52,7 @@ describe('formatMedia', () => {
         expect(callbacks.onPreprocessingStarted).toHaveBeenCalledWith(expect.any(String));
         expect(callbacks.onPreprocessingFinished).toHaveBeenCalledOnce();
         expect(callbacks.onPreprocessingFinished).toHaveBeenCalledWith(expect.any(String));
-        
+
         // Verify the output path was returned
         expect(outputPath).toBe(outputFile);
     });

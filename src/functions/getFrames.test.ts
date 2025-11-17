@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { CropPreset, FramePreprocessingPreset } from '../types';
