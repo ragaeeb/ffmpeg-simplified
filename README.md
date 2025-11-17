@@ -6,6 +6,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/ragaeeb/ffmpeg-simplified)
 [![codecov](https://codecov.io/gh/ragaeeb/ffmpeg-simplified/graph/badge.svg?token=6B40XM3HNB)](https://codecov.io/gh/ragaeeb/ffmpeg-simplified)
 ![typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label&color=blue)
+[![Size](https://deno.bundlejs.com/badge?q=ffmpeg-simplified@latest&badge=detailed)](https://bundlejs.com/?q=ffmpeg-simplified%40latest)
 ![bun](https://img.shields.io/badge/runtime-bun-%23000000)
 
 `ffmpeg-simplified` is a batteries-included toolkit built on top of [`ffmpeggy`](https://github.com/mekwall/ffmpeggy). It exposes an ergonomic, Promise-based API for everyday audio and video automation tasks while leaning on your locally installed `ffmpeg` binary.
