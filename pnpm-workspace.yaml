@@ -1,8 +1,0 @@
-onlyBuiltDependencies:
-  - '@biomejs/biome'
-  - '@parcel/watcher'
-  - '@swc/core'
-  - esbuild
-  - ffmpeg-static
-  - lmdb
-  - msgpackr-extract

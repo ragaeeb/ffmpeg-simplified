@@ -26,6 +26,14 @@ type CropOffset = {
   y: number; // y-offset
 };
 
+/**
+ * Converts crop options expressed as percentages into pixel offsets and dimensions.
+ *
+ * @param {number} width - Original frame width in pixels.
+ * @param {number} height - Original frame height in pixels.
+ * @param {CropOptions | CropPreset} [cropOptions] - Either a preset name or explicit crop percentages.
+ * @returns {CropOffset} Calculated crop rectangle description.
+ */
 const mapOptionsToCropOffset = (
   width: number,
   height: number,
@@ -68,6 +76,12 @@ const mapOptionsToCropOffset = (
   return { width: cropWidth, height: cropHeight, x: cropLeft, y: cropTop };
 };
 
+/**
+ * Formats a {@link CropOffset} object into an ffmpeg crop filter string.
+ *
+ * @param {CropOffset} offset - Calculated crop dimensions and offsets.
+ * @returns {string} The ffmpeg filter string.
+ */
 const mapCropOffsetToCropFilter = ({
   width,
   height,
@@ -75,6 +89,14 @@ const mapCropOffsetToCropFilter = ({
   y,
 }: CropOffset): string => `crop=${width}:${height}:${x}:${y}`;
 
+/**
+ * Derives the ffmpeg crop filter string for the provided crop options.
+ *
+ * @param {number} width - Original frame width in pixels.
+ * @param {number} height - Original frame height in pixels.
+ * @param {CropOptions | CropPreset} [cropOptions] - Either a preset or explicit crop percentages.
+ * @returns {string} ffmpeg crop filter expression.
+ */
 export const mapCropOptionsToCropFilter = (
   width: number,
   height: number,

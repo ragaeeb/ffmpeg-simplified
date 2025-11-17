@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "bun:test";
 
 import { mapCropOptionsToCropFilter } from "./cropping";
 import { type CropOptions, CropPreset } from "../types";

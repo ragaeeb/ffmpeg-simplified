@@ -1,99 +1,111 @@
-import ffmpeg from "fluent-ffmpeg";
-import type { Readable } from "node:stream";
-import type {
-  NoiseReductionOptions,
-  PreprocessingCallbacks,
-  PreprocessOptions,
-} from "../types";
-import logger from "../utils/logger";
-import { NOISE_REDUCTION_OPTIONS_DEFAULTS } from "./constants";
-import os from "node:os";
+import type { ReadStream } from 'node:fs';
+import os from 'node:os';
+import type { Logger, NoiseReductionOptions, PreprocessingCallbacks, PreprocessOptions } from '@/types';
+import { FFmpeggy } from '@/vendor/ffmpeggy';
+import { NOISE_REDUCTION_OPTIONS_DEFAULTS } from './constants';
 
+/**
+ * Maps the provided noise reduction configuration into ffmpeg audio filter expressions.
+ *
+ * @param {NoiseReductionOptions} options - Noise reduction tuning values.
+ * @returns {string[]} ffmpeg audio filter definitions.
+ */
 const buildConversionFilters = ({
-  afftdn_nf,
-  afftdnStart,
-  afftdnStop,
-  dialogueEnhance,
-  highpass,
-  lowpass,
+    afftdn_nf,
+    afftdnStart,
+    afftdnStop,
+    dialogueEnhance,
+    highpass,
+    lowpass,
 }: NoiseReductionOptions): string[] => {
-  const filters = [
-    highpass !== null && `highpass=f=${highpass}`,
-    afftdnStart !== null &&
-      afftdnStop !== null && [
-        `asendcmd=${afftdnStart} afftdn sn start`,
-        `asendcmd=${afftdnStop} afftdn sn stop`,
-      ],
-    afftdn_nf !== null && `afftdn=nf=${afftdn_nf}`,
-    dialogueEnhance && "dialoguenhance",
-    lowpass && `lowpass=f=${lowpass}`,
-  ]
-    .flat()
-    .filter(Boolean) as string[]; // Flatten and filter out undefined values
+    const filters = [
+        highpass !== null && `highpass=f=${highpass}`,
+        afftdnStart !== null &&
+            afftdnStop !== null && [`asendcmd=${afftdnStart} afftdn sn start`, `asendcmd=${afftdnStop} afftdn sn stop`],
+        afftdn_nf !== null && `afftdn=nf=${afftdn_nf}`,
+        dialogueEnhance && 'dialoguenhance',
+        lowpass && `lowpass=f=${lowpass}`,
+    ]
+        .flat()
+        .filter(Boolean) as string[]; // Flatten and filter out undefined values
 
-  return filters;
+    return filters;
 };
 
 /**
  * Preprocesses a media file with options like noise reduction and format conversion.
  *
- * @param {Readable | string} input - Input stream or file path.
- * @param {string} outputDir - Directory where the processed file will be saved.
+ * @param {ReadStream | string} input - Input stream or file path.
+ * @param {string} outputPath - Destination path where the processed file will be written.
  * @param {PreprocessOptions} [options] - Optional preprocessing options.
  * @param {PreprocessingCallbacks} [callbacks] - Optional callbacks for progress tracking.
+ * @param {Logger} [logger] - Optional logger for debug and error messages.
  * @returns {Promise<string>} - Promise resolving to the path of the processed media file.
  */
 export const formatMedia = async (
-  input: Readable | string,
-  outputPath: string,
-  options?: PreprocessOptions,
-  callbacks?: PreprocessingCallbacks
+    input: ReadStream | string,
+    outputPath: string,
+    options?: PreprocessOptions,
+    callbacks?: PreprocessingCallbacks,
+    logger?: Logger,
 ): Promise<string> => {
-  logger.debug(`formatMedia: ${input}, outputPath: ${outputPath}`);
+    logger?.debug?.(`formatMedia: ${input}, outputPath: ${outputPath}`);
 
-  if (callbacks?.onPreprocessingStarted) {
-    await callbacks.onPreprocessingStarted(outputPath);
-  }
-
-  return new Promise<string>((resolve, reject) => {
-    let command = ffmpeg(input).audioChannels(1);
-
-    if (options?.noiseReduction !== null) {
-      const filters = buildConversionFilters({
-        ...NOISE_REDUCTION_OPTIONS_DEFAULTS,
-        ...options?.noiseReduction,
-      });
-      logger.debug(filters, "Using filters");
-      command = command.audioFilters(filters);
+    if (callbacks?.onPreprocessingStarted) {
+        await callbacks.onPreprocessingStarted(outputPath);
     }
 
-    if (options?.fast) {
-      const maxThreads = os.cpus().length;
-      command = command.outputOptions([`-threads ${maxThreads}`]);
-      logger.debug(`Using fast mode with ${maxThreads} threads`);
-    }
+    return new Promise<string>((resolve, reject) => {
+        const outputOptions: string[] = ['-ac 1']; // audio channels
 
-    logger.debug(`saveTo: ${outputPath}`);
-
-    command
-      .on("error", (err) => {
-        logger.error(`Error during file conversion: ${err.message}`);
-        reject(err);
-      })
-      .on("progress", (progress) => {
-        if (callbacks?.onPreprocessingProgress) {
-          callbacks.onPreprocessingProgress(progress.percent || 0);
-        }
-      })
-      .on("end", async () => {
-        logger.debug(`Formatted file: ${outputPath}`);
-
-        if (callbacks?.onPreprocessingFinished) {
-          await callbacks.onPreprocessingFinished(outputPath);
+        if (options?.noiseReduction !== null) {
+            const filters = buildConversionFilters({
+                ...NOISE_REDUCTION_OPTIONS_DEFAULTS,
+                ...options?.noiseReduction,
+            });
+            logger?.debug?.(`Using filters: ${filters.join(', ')}`);
+            if (filters.length > 0) {
+                outputOptions.push(`-af ${filters.join(',')}`);
+            }
         }
 
-        resolve(outputPath);
-      })
-      .save(outputPath);
-  });
+        if (options?.fast) {
+            const maxThreads = os.cpus().length;
+            outputOptions.push(`-threads ${maxThreads}`);
+            logger?.debug?.(`Using fast mode with ${maxThreads} threads`);
+        }
+
+        logger?.debug?.(`saveTo: ${outputPath}`);
+
+        const ffmpeggy = new FFmpeggy({
+            autorun: true,
+            input,
+            output: outputPath,
+            outputOptions,
+            overwriteExisting: true,
+        });
+
+        ffmpeggy
+            .on('error', (err) => {
+                logger?.error?.(`Error during file conversion: ${err.message}`);
+                reject(err);
+            })
+            .on('progress', (progress) => {
+                if (callbacks?.onPreprocessingProgress && progress.percent) {
+                    callbacks.onPreprocessingProgress(progress.percent);
+                }
+            })
+            .on('done', () => {
+                logger?.debug?.(`Formatted file: ${outputPath}`);
+
+                if (callbacks?.onPreprocessingFinished) {
+                    // Fire and forget - don't block on callback completion
+                    callbacks.onPreprocessingFinished(outputPath).catch((err) => {
+                        logger?.error?.(`Error in onPreprocessingFinished callback: ${err}`);
+                    });
+                }
+
+                resolve(outputPath);
+            });
+    });
 };

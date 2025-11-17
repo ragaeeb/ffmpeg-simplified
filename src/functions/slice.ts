@@ -1,54 +1,61 @@
-import ffmpeg from "fluent-ffmpeg";
-import logger from "../utils/logger";
-import path from "node:path";
-import type { SliceOptions } from "../types";
-import os from "node:os";
+import os from 'node:os';
+import path from 'node:path';
+import type { Logger, SliceOptions } from '@/types';
+import { FFmpeggy } from '@/vendor/ffmpeggy';
 
 /**
  * Slices a media file into multiple parts based on specified time ranges.
  *
  * @param {string} file - Path to the input media file.
  * @param {SliceOptions} options - Options containing the time ranges and output folder.
+ * @param {Logger} [logger] - Optional logger for debug and info messages.
  * @returns {Promise<string[]>} - Promise resolving to an array of paths to the sliced files.
  */
-export const slice = async (
-  file: string,
-  options: SliceOptions
-): Promise<string[]> => {
-  const outputFiles: string[] = [];
-  const fileName = path.basename(file, path.extname(file)); // e.g., "a" from "a.mp4"
-  const fileExtension = path.extname(file); // e.g., ".mp4"
+export const slice = async (file: string, options: SliceOptions, logger?: Logger): Promise<string[]> => {
+    const outputFiles: string[] = [];
+    const fileName = path.basename(file, path.extname(file));
+    const fileExtension = path.extname(file);
 
-  for (let i = 0; i < options.ranges.length; i++) {
-    const { start, end } = options.ranges[i];
-    const outputFile = path.join(
-      options.outputFolder,
-      `${fileName}_${i + 1}${fileExtension}`
-    ); // e.g., "a_slice1.mp4"
+    const threads = options.fast ? os.cpus().length : 0;
 
-    await new Promise<void>((resolve, reject) => {
-      let command = ffmpeg(file)
-        .setStartTime(start)
-        .setDuration(end - start)
-        .output(outputFile);
+    for (let i = 0; i < options.ranges.length; i++) {
+        const { start, end } = options.ranges[i];
 
-      if (options.fast) {
-        command = command.outputOptions([`-threads ${os.cpus().length}`]);
-        logger.debug(
-          `Using fast mode with ${os.cpus().length} threads for slicing`
-        );
-      }
+        if (end <= start) {
+            throw new Error(`Invalid slice range: end (${end}) must be greater than start (${start})`);
+        }
 
-      command
-        .on("end", () => {
-          logger.info(`Sliced video saved as ${outputFile}`);
-          outputFiles.push(outputFile);
-          resolve();
-        })
-        .on("error", (err) => reject(err))
-        .run();
-    });
-  }
+        const outputFile = path.join(options.outputFolder, `${fileName}_${i + 1}${fileExtension}`);
 
-  return outputFiles;
+        const outputOptions: string[] = [];
+
+        if (options.fast && threads) {
+            outputOptions.push(`-threads ${threads}`);
+
+            if (logger?.debug) {
+                logger.debug(`Using fast mode with ${threads} threads for slicing`);
+            }
+        }
+
+        const ffmpeggy = new FFmpeggy({
+            autorun: true,
+            input: file,
+            inputOptions: [`-ss ${start}`],
+            output: outputFile,
+            outputOptions: [...outputOptions, `-t ${end - start}`],
+            overwriteExisting: true,
+        });
+
+        await new Promise<void>((resolve, reject) => {
+            ffmpeggy.on('done', () => {
+                logger?.info?.(`Sliced video saved as ${outputFile}`);
+                resolve();
+            });
+            ffmpeggy.on('error', reject);
+        });
+
+        outputFiles.push(outputFile);
+    }
+
+    return outputFiles;
 };
