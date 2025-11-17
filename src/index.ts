@@ -11,3 +11,12 @@ export * from './functions/sliceAndMerge';
 export * from './functions/splitFileOnSilences';
 export * from './types';
 export * from './utils/io';
+export type {
+    FFmpegHandlers,
+    FFmpegOptions,
+    FFmpegProgress,
+    FFmpegVersion,
+    FFprobeResult,
+} from './vendor/ffmpeg';
+// Export FFmpeg wrapper utilities for advanced use cases
+export { detectFFmpeg, probe, runFFmpeg } from './vendor/ffmpeg';

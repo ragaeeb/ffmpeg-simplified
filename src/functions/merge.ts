@@ -1,9 +1,9 @@
-import { promises as fs } from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
-import type { Logger, MergeOptions } from '@/types';
-import { generateHashFromInputFiles } from '@/utils/io';
-import { FFmpeggy } from '@/vendor/ffmpeggy';
+import { promises as fs } from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import type { Logger, MergeOptions } from "@/types";
+import { generateHashFromInputFiles } from "@/utils/io";
+import { runFFmpeg } from "@/vendor/ffmpeg";
 
 /**
  * Merges multiple media files into a single output file.
@@ -15,47 +15,45 @@ import { FFmpeggy } from '@/vendor/ffmpeggy';
  * @returns {Promise<string>} Promise resolving to the path of the merged output file.
  */
 export const mergeSlices = async (
-    inputFiles: string[],
-    outputFile: string,
-    options: MergeOptions = {},
-    logger?: Logger,
+	inputFiles: string[],
+	outputFile: string,
+	options: MergeOptions = {},
+	logger?: Logger,
 ): Promise<string> => {
-    const concatFile = path.join(
-        os.tmpdir(),
-        path.format({ ext: '.txt', name: generateHashFromInputFiles(inputFiles) }),
-    );
+	const concatFile = path.join(
+		os.tmpdir(),
+		path.format({ ext: ".txt", name: generateHashFromInputFiles(inputFiles) }),
+	);
 
-    const fileContent = inputFiles.map((file) => `file '${file}'`).join('\n');
-    await fs.writeFile(concatFile, fileContent);
+	const fileContent = inputFiles.map((file) => `file '${file}'`).join("\n");
+	await fs.writeFile(concatFile, fileContent);
 
-    try {
-        const outputOptions = ['-c copy'];
-        if (options.fast) {
-            outputOptions.push(`-threads ${os.cpus().length}`);
-        }
+	try {
+		const outputOptions = ["-c", "copy"];
+		if (options.fast) {
+			outputOptions.push("-threads", `${os.cpus().length}`);
+		}
 
-        const ffmpeggy = new FFmpeggy({
-            autorun: true,
-            input: concatFile,
-            inputOptions: ['-f concat', '-safe 0'],
-            output: outputFile,
-            outputOptions,
-            overwriteExisting: true,
-        });
+		await runFFmpeg(
+			{
+				input: concatFile,
+				inputOptions: ["-f", "concat", "-safe", "0"],
+				output: outputFile,
+				outputOptions,
+				overwriteExisting: true,
+			},
+			{
+				onDone: () => {
+					logger?.info?.(`Merged video saved as ${outputFile}`);
+				},
+				onError: (err) => {
+					logger?.error?.(`Error during merge: ${err.message}`);
+				},
+			},
+		);
+	} finally {
+		await fs.rm(concatFile, { recursive: true });
+	}
 
-        await new Promise<void>((resolve, reject) => {
-            ffmpeggy.on('done', () => {
-                logger?.info?.(`Merged video saved as ${outputFile}`);
-                resolve();
-            });
-            ffmpeggy.on('error', (err) => {
-                logger?.error?.(`Error during merge: ${err.message}`);
-                reject(err);
-            });
-        });
-    } finally {
-        await fs.rm(concatFile, { recursive: true });
-    }
-
-    return outputFile;
+	return outputFile;
 };

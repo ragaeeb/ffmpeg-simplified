@@ -9,31 +9,36 @@
 [![Size](https://deno.bundlejs.com/badge?q=ffmpeg-simplified@latest&badge=detailed)](https://bundlejs.com/?q=ffmpeg-simplified%40latest)
 ![bun](https://img.shields.io/badge/runtime-bun-%23000000)
 
-`ffmpeg-simplified` is a batteries-included toolkit built on top of [`ffmpeggy`](https://github.com/mekwall/ffmpeggy). It exposes an ergonomic, Promise-based API for everyday audio and video automation tasks while leaning on your locally installed `ffmpeg` binary.
+`ffmpeg-simplified` is a batteries-included toolkit that provides a simple, ergonomic Promise-based API for everyday audio and video automation tasks. It directly wraps your locally installed `ffmpeg` binary without any intermediate dependencies.
 
 ## Features
 
-- ✅ Zero-configuration access to common `ffmpeg` workflows (noise reduction, slicing, merging, frame capture, audio swapping, audio syncing and more).
-- ✅ Written in TypeScript with rich type definitions and detailed JSDoc comments for every function.
-- ✅ Ships prebuilt bundles via [`tsdown`](https://github.com/privatenumber/tsdown) and targets modern Node/Bun runtimes.
-- ✅ Test suite powered by [`bun test`](https://bun.sh/docs/test) and real media fixtures to ensure behaviour parity with `ffmpeg`.
-- ✅ Built on the lightweight and modern [`ffmpeggy`](https://github.com/mekwall/ffmpeggy) wrapper.
+- ✅ **Zero external wrapper dependencies** - Direct FFmpeg integration with no third-party wrappers to maintain
+- ✅ **Zero-configuration** - Automatic detection of system-installed `ffmpeg` and `ffprobe` binaries
+- ✅ **Comprehensive workflows** - Noise reduction, slicing, merging, frame capture, audio swapping, audio syncing and more
+- ✅ **TypeScript-native** - Rich type definitions and detailed JSDoc comments for every function
+- ✅ **Modern runtimes** - Ships prebuilt bundles via [`tsdown`](https://github.com/privatenumber/tsdown) targeting Node ≥22 and Bun ≥1.0
+- ✅ **Battle-tested** - Test suite powered by [`bun test`](https://bun.sh/docs/test) with real media fixtures
 
 ## Requirements
 
-- Node.js ≥ **22.0.0** or Bun ≥ **1.0**.
-- A working `ffmpeg` installation available on your `PATH`. The package intentionally avoids bundling `ffmpeg-static` so that you can manage codecs and updates yourself.
-- Optional: set `FFMPEG_PATH` and/or `FFPROBE_PATH` environment variables if the binaries live somewhere other than your shell `PATH`.
+- Node.js ≥ **22.0.0** or Bun ≥ **1.0**
+- A working `ffmpeg` installation available on your `PATH`
 
-### Built with `ffmpeggy`
+The package automatically detects system-installed `ffmpeg` and `ffprobe` binaries using the `which` utility. We intentionally avoid bundling `ffmpeg-static` so you can manage codecs and updates yourself.
 
-The library uses [`ffmpeggy`](https://github.com/mekwall/ffmpeggy), a minimal event-driven wrapper that shells out to locally installed `ffmpeg` and `ffprobe` executables. The wrapper:
+### Custom FFmpeg Wrapper
 
-- Automatically detects system-installed `ffmpeg`/`ffprobe` binaries using the `which` utility
-- Provides a clean Promise-based API with event hooks for progress tracking
-- Supports Node.js streams for input and output
-- Includes built-in FFprobe integration for media analysis
-- Emits detailed progress events during encoding operations
+The library includes a lightweight custom wrapper (`src/vendor/ffmpeg.ts`) tailored specifically for this package's use cases:
+
+- **Direct process spawning** - No argument parsing issues with complex filter chains
+- **Progress tracking** - Parses FFmpeg's stderr for real-time progress events
+- **Stream support** - Handles Node.js ReadStream/WriteStream for piped I/O
+- **FFprobe integration** - Built-in JSON parsing of media metadata
+- **Error handling** - Robust stderr capture and error reporting
+- **Version detection** - Automatically detects FFmpeg installation and version
+
+This approach eliminates dependency on external wrappers while providing a clean, maintainable implementation focused on our specific needs.
 
 ## Installation
 

@@ -1,10 +1,16 @@
-import path from 'node:path';
-import deepmerge from 'deepmerge';
-import type { AudioChunk, Logger, SplitOnSilenceCallbacks, SplitOptions, TimeRange } from '@/types';
-import { FFmpeggy } from '@/vendor/ffmpeggy';
-import { DEFAULT_SHORT_CLIP_PADDING, SPLIT_OPTIONS_DEFAULTS } from './constants';
-import { detectSilences } from './detectSilences';
-import { getMediaDuration } from './getMediaDuration';
+import path from "node:path";
+import deepmerge from "deepmerge";
+import type {
+	AudioChunk,
+	Logger,
+	SplitOnSilenceCallbacks,
+	SplitOptions,
+	TimeRange,
+} from "@/types";
+import { runFFmpeg } from "@/vendor/ffmpeg";
+import { DEFAULT_SHORT_CLIP_PADDING, SPLIT_OPTIONS_DEFAULTS } from "./constants";
+import { detectSilences } from "./detectSilences";
+import { getMediaDuration } from "./getMediaDuration";
 
 /**
  * Splits an audio timeline into non-silent "voice" segments by dividing
@@ -16,47 +22,48 @@ import { getMediaDuration } from './getMediaDuration';
  * @returns {TimeRange[]} Array of non-silent time ranges representing voice segments.
  */
 export const mapSilenceResultsToChunkRanges = (
-    silenceResults: TimeRange[],
-    chunkDuration: number,
-    totalDuration: number,
+	silenceResults: TimeRange[],
+	chunkDuration: number,
+	totalDuration: number,
 ): TimeRange[] => {
-    if (chunkDuration <= 0) {
-        throw new Error('chunkDuration must be greater than 0');
-    }
+	if (chunkDuration <= 0) {
+		throw new Error("chunkDuration must be greater than 0");
+	}
 
-    if (chunkDuration >= totalDuration) {
-        return [{ end: totalDuration, start: 0 }];
-    }
+	if (chunkDuration >= totalDuration) {
+		return [{ end: totalDuration, start: 0 }];
+	}
 
-    const chunks: TimeRange[] = [];
-    let currentStart = 0;
+	const chunks: TimeRange[] = [];
+	let currentStart = 0;
 
-    const isFullySilent = (start: number, end: number) => silenceResults.some((s) => start >= s.start && end <= s.end);
+	const isFullySilent = (start: number, end: number) =>
+		silenceResults.some((s) => start >= s.start && end <= s.end);
 
-    while (currentStart < totalDuration) {
-        const chunkEnd = Math.min(currentStart + chunkDuration, totalDuration);
+	while (currentStart < totalDuration) {
+		const chunkEnd = Math.min(currentStart + chunkDuration, totalDuration);
 
-        const relevantSilences = silenceResults
-            .filter((s) => s.start > currentStart && s.start <= chunkEnd)
-            .sort((a, b) => b.start - a.start);
+		const relevantSilences = silenceResults
+			.filter((s) => s.start > currentStart && s.start <= chunkEnd)
+			.sort((a, b) => b.start - a.start);
 
-        const segStart = currentStart;
-        let segEnd: number;
+		const segStart = currentStart;
+		let segEnd: number;
 
-        if (relevantSilences.length > 0) {
-            segEnd = relevantSilences[0].start;
-            currentStart = relevantSilences[0].start;
-        } else {
-            segEnd = chunkEnd;
-            currentStart = chunkEnd;
-        }
+		if (relevantSilences.length > 0) {
+			segEnd = relevantSilences[0].start;
+			currentStart = relevantSilences[0].start;
+		} else {
+			segEnd = chunkEnd;
+			currentStart = chunkEnd;
+		}
 
-        if (segEnd > segStart && !isFullySilent(segStart, segEnd)) {
-            chunks.push({ end: segEnd, start: segStart });
-        }
-    }
+		if (segEnd > segStart && !isFullySilent(segStart, segEnd)) {
+			chunks.push({ end: segEnd, start: segStart });
+		}
+	}
 
-    return chunks;
+	return chunks;
 };
 
 /**
@@ -70,88 +77,89 @@ export const mapSilenceResultsToChunkRanges = (
  * @returns {Promise<AudioChunk[]>} - Promise resolving to an array of audio chunks with file names and time ranges.
  */
 export const splitFileOnSilences = async (
-    filePath: string,
-    outputDir: string,
-    options?: SplitOptions,
-    callbacks?: SplitOnSilenceCallbacks,
-    logger?: Logger,
+	filePath: string,
+	outputDir: string,
+	options?: SplitOptions,
+	callbacks?: SplitOnSilenceCallbacks,
+	logger?: Logger,
 ): Promise<AudioChunk[]> => {
-    const parsedPath = path.parse(filePath);
+	const parsedPath = path.parse(filePath);
 
-    logger?.debug?.(`Split file ${filePath}`);
+	logger?.debug?.(`Split file ${filePath}`);
 
-    const {
-        chunkDuration,
-        chunkMinThreshold,
-        silenceDetection: { silenceDuration, silenceThreshold },
-    } = deepmerge(SPLIT_OPTIONS_DEFAULTS, options || {});
+	const {
+		chunkDuration,
+		chunkMinThreshold,
+		silenceDetection: { silenceDuration, silenceThreshold },
+	} = deepmerge(SPLIT_OPTIONS_DEFAULTS, options || {});
 
-    logger?.info?.(
-        `Using chunkDuration=${chunkDuration}, chunkMinThreshold=${chunkMinThreshold}, silenceThreshold=${silenceThreshold}, silenceDuration=${silenceDuration}`,
-    );
+	logger?.info?.(
+		`Using chunkDuration=${chunkDuration}, chunkMinThreshold=${chunkMinThreshold}, silenceThreshold=${silenceThreshold}, silenceDuration=${silenceDuration}`,
+	);
 
-    const totalDuration = await getMediaDuration(filePath);
+	const totalDuration = await getMediaDuration(filePath);
 
-    if (chunkDuration >= totalDuration) {
-        return [{ filename: filePath, range: { end: totalDuration, start: 0 } }];
-    }
+	if (chunkDuration >= totalDuration) {
+		return [{ filename: filePath, range: { end: totalDuration, start: 0 } }];
+	}
 
-    const silences = await detectSilences(filePath, {
-        silenceDuration,
-        silenceThreshold,
-    });
+	const silences = await detectSilences(filePath, {
+		silenceDuration,
+		silenceThreshold,
+	});
 
-    const chunkRanges: TimeRange[] = mapSilenceResultsToChunkRanges(silences, chunkDuration, totalDuration).filter(
-        (r) => r.end - r.start > chunkMinThreshold,
-    );
+	const chunkRanges: TimeRange[] = mapSilenceResultsToChunkRanges(
+		silences,
+		chunkDuration,
+		totalDuration,
+	).filter((r) => r.end - r.start > chunkMinThreshold);
 
-    const chunks: AudioChunk[] = chunkRanges.map((range, index) => ({
-        filename: path.format({
-            dir: outputDir || parsedPath.dir,
-            ext: parsedPath.ext,
-            name: `${parsedPath.name}-chunk-${index.toString().padStart(3, '0')}`,
-        }),
-        range,
-    }));
+	const chunks: AudioChunk[] = chunkRanges.map((range, index) => ({
+		filename: path.format({
+			dir: outputDir || parsedPath.dir,
+			ext: parsedPath.ext,
+			name: `${parsedPath.name}-chunk-${index.toString().padStart(3, "0")}`,
+		}),
+		range,
+	}));
 
-    if (chunks.length > 0) {
-        if (callbacks?.onSplittingStarted) {
-            await callbacks.onSplittingStarted(chunks.length);
-        }
+	if (chunks.length > 0) {
+		if (callbacks?.onSplittingStarted) {
+			await callbacks.onSplittingStarted(chunks.length);
+		}
 
-        await Promise.all(
-            chunks.map((chunk, chunkIndex) => {
-                return new Promise<void>((resolve, reject) => {
-                    const duration = chunk.range.end - chunk.range.start;
+		await Promise.all(
+			chunks.map((chunk, chunkIndex) => {
+				const duration = chunk.range.end - chunk.range.start;
 
-                    const ffmpeggy = new FFmpeggy({
-                        autorun: true,
-                        input: filePath,
-                        inputOptions: [`-ss ${chunk.range.start}`],
-                        output: chunk.filename,
-                        outputOptions: [
-                            `-t ${duration}`,
-                            `-af apad=pad_dur=${DEFAULT_SHORT_CLIP_PADDING},loudnorm,compand`,
-                        ],
-                        overwriteExisting: true,
-                    });
+				return runFFmpeg(
+					{
+						input: filePath,
+						inputOptions: ["-ss", `${chunk.range.start}`],
+						output: chunk.filename,
+						outputOptions: [
+							"-t",
+							`${duration}`,
+							"-af",
+							`apad=pad_dur=${DEFAULT_SHORT_CLIP_PADDING},loudnorm,compand`,
+						],
+						overwriteExisting: true,
+					},
+					{
+						onDone: () => {
+							if (callbacks?.onSplittingProgress) {
+								callbacks.onSplittingProgress(chunk.filename, chunkIndex);
+							}
+						},
+					},
+				);
+			}),
+		);
 
-                    ffmpeggy.on('done', () => {
-                        if (callbacks?.onSplittingProgress) {
-                            callbacks.onSplittingProgress(chunk.filename, chunkIndex);
-                        }
-                        resolve();
-                    });
+		if (callbacks?.onSplittingFinished) {
+			await callbacks.onSplittingFinished();
+		}
+	}
 
-                    ffmpeggy.on('error', reject);
-                });
-            }),
-        );
-
-        if (callbacks?.onSplittingFinished) {
-            await callbacks.onSplittingFinished();
-        }
-    }
-
-    return chunks;
+	return chunks;
 };

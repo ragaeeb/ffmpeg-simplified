@@ -1,5 +1,5 @@
 import { promises as fs } from 'node:fs';
-import type { Logger, SliceAndMergeOptions, TimeRange } from '../types';
+import type { Logger, SliceAndMergeOptions, TimeRange } from '@/types';
 import { createTempDir } from '../utils/io';
 import { getMediaDuration } from './getMediaDuration';
 import { mergeSlices } from './merge';
