@@ -14,10 +14,12 @@ try {
         ffmpegBin: ffmpegPath,
         ffprobeBin: ffprobePath,
     };
-} catch {
+} catch (error) {
     // If which fails, ffmpeggy will fall back to PATH lookup
     // or use FFMPEG_PATH/FFPROBE_PATH environment variables
-    console.warn('Could not locate ffmpeg/ffprobe binaries via which, falling back to default lookup');
+
+    const message = error instanceof Error ? error.message : 'unknown error';
+    console.warn(`Could not locate ffmpeg/ffprobe binaries via which (${message}), falling back to default lookup`);
 }
 
 export { FFmpeggy };

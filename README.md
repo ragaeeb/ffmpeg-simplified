@@ -61,6 +61,7 @@ import {
   slice,
   sliceAndMerge,
   splitFileOnSilences,
+  type Logger,
 } from "ffmpeg-simplified";
 
 const duration = await getMediaDuration("./samples/interview.mp4");
@@ -75,33 +76,67 @@ await formatMedia("./samples/interview.wav", "./output/clean.wav", {
 await delayAudio("./samples/video.mp4", "./output/synced.mp4", 0.5);
 ```
 
+### Custom logging
+
+Most functions accept an optional `logger` parameter that conforms to the `Logger` interface (compatible with `console` and popular logging libraries):
+
+```ts
+import type { Logger } from "ffmpeg-simplified";
+
+// Use the built-in console
+await formatMedia(input, output, options, callbacks, console);
+
+// Or your own logger (pino, winston, etc.)
+import pino from "pino";
+const logger = pino();
+await sliceAndMerge(input, output, options, logger);
+
+// Minimal custom logger
+const customLogger: Logger = {
+  info: (msg) => console.log(`[INFO] ${msg}`),
+  error: (msg) => console.error(`[ERROR] ${msg}`),
+};
+await splitFileOnSilences(file, outputDir, options, callbacks, customLogger);
+```
+
+The `Logger` interface is simple and all methods are optional:
+
+```ts
+interface Logger {
+  info?: (message: string, ...args: any[]) => void;
+  debug?: (message: string, ...args: any[]) => void;
+  warn?: (message: string, ...args: any[]) => void;
+  error?: (message: string, ...args: any[]) => void;
+}
+```
+
 ## API overview
 
-### `delayAudio(inputFile, outputFile, delayInSeconds)`
+### `delayAudio(inputFile, outputFile, delayInSeconds, logger?)`
 Adjusts audio synchronization in a video by applying a delay (positive) or advance (negative) to the audio track.
 
 ### `detectSilences(filePath, options)`
 Finds quiet sections in an audio file using `silencedetect`.
 
-### `formatMedia(input, outputPath, options?, callbacks?)`
+### `formatMedia(input, outputPath, options?, callbacks?, logger?)`
 Preprocess audio streams (noise reduction, mono downmixing, fast mode, callback hooks).
 
 ### `getMediaDuration(filePath)` / `getVideoDimensions(filePath)`
 Lightweight wrappers around `ffprobe` for duration and resolution metadata.
 
-### `splitFileOnSilences(filePath, outputDir, options?, callbacks?)`
-Chunk long-form audio into natural speaking segments and normalises short clips.
+### `splitFileOnSilences(filePath, outputDir, options?, callbacks?, logger?)`
+Chunk long-form audio into natural speaking segments and normalizes short clips.
 
-### `slice(filePath, options)` / `sliceAndMerge(filePath, outputFile, options)`
+### `slice(filePath, options, logger?)` / `sliceAndMerge(filePath, outputFile, options, logger?)`
 Slice videos by absolute timestamps or human-friendly timecodes, then optionally merge back together.
 
-### `mergeSlices(inputFiles, outputFile, options?)`
+### `mergeSlices(inputFiles, outputFile, options?, logger?)`
 Concat arbitrary files using the efficient concat demuxer.
 
-### `replaceAudio(videoFile, audioFile, outputFile)`
+### `replaceAudio(videoFile, audioFile, outputFile, logger?)`
 Swap a video's audio track without re-encoding the video stream.
 
-### `getFrames(videoFile, options)`
+### `getFrames(videoFile, options, logger?)`
 Extract thumbnails at a fixed cadence with optional cropping and preprocessing presets.
 
 Refer to the inline JSDoc comments for parameter details and return types—every exported function documents accepted options and callback hooks.

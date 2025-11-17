@@ -1,4 +1,19 @@
 /**
+ * Logger interface compatible with console and most logging libraries.
+ * All methods are optional to allow partial implementations.
+ */
+export interface Logger {
+  /** Log an informational message */
+  info?: (message: string, ...args: any[]) => void;
+  /** Log a debug message */
+  debug?: (message: string, ...args: any[]) => void;
+  /** Log a warning message */
+  warn?: (message: string, ...args: any[]) => void;
+  /** Log an error message */
+  error?: (message: string, ...args: any[]) => void;
+}
+
+/**
  * Represents a time range with start and end times in seconds.
  */
 export type TimeRange = {
@@ -127,6 +142,9 @@ export type SliceAndMergeOptions = {
   fast?: boolean;
 };
 
+/**
+ * Options for merging media files.
+ */
 export type MergeOptions = {
   /** Use the maximum number of threads */
   fast?: boolean;
@@ -193,13 +211,23 @@ export type AudioChunk = {
   range: TimeRange;
 };
 
+/**
+ * Options for cropping video frames.
+ */
 export interface CropOptions {
-  top?: number; // Percentage to crop from the top (0-100)
-  bottom?: number; // Percentage to crop from the bottom (0-100)
-  left?: number; // Percentage to crop from the left (0-100)
-  right?: number; // Percentage to crop from the right (0-100)
+  /** Percentage to crop from the top (0-100) */
+  top?: number;
+  /** Percentage to crop from the bottom (0-100) */
+  bottom?: number;
+  /** Percentage to crop from the left (0-100) */
+  left?: number;
+  /** Percentage to crop from the right (0-100) */
+  right?: number;
 }
 
+/**
+ * Preset options for cropping video frames to focus on text regions.
+ */
 export enum CropPreset {
   HorizontallyCenteredText = "HorizontallyCenteredText",
   VerticallyCenteredText = "VerticallyCenteredText",
@@ -207,30 +235,54 @@ export enum CropPreset {
   TopText = "TopText",
 }
 
+/**
+ * Preset options for preprocessing video frames.
+ */
 export enum FramePreprocessingPreset {
   DarkTextOnLightBackground = "DarkTextOnLightBackground",
   LightTextOnDarkBackground = "LightTextOnDarkBackground",
 }
 
+/**
+ * Options for preprocessing video frames before extraction.
+ */
 export interface FramePreprocessingOptions {
+  /** Preprocessing preset to apply */
   preset?: FramePreprocessingPreset;
+  /** Contrast adjustment value */
   contrast?: number;
+  /** Brightness adjustment value */
   brightness?: number;
+  /** Threshold value for processing */
   threshold?: number;
+  /** Whether to convert to grayscale */
   grayscale?: boolean;
 }
 
-/** Options for the getFrames function. */
+/**
+ * Options for extracting frames from a video file.
+ */
 export type GetFramesOptions = {
-  frequency: number; // in seconds
+  /** Frame extraction frequency in seconds */
+  frequency: number;
+  /** Crop options for frames */
   cropOptions?: CropPreset | CropOptions;
+  /** Preprocessing options for frames */
   preprocessingOptions?: FramePreprocessingOptions | FramePreprocessingPreset;
-  outputFolder: string; // Output directory for the screenshots files.
+  /** Output directory for the extracted frame files */
+  outputFolder: string;
+  /** Prefix for frame filenames */
   filePrefix?: string;
+  /** File extension for extracted frames */
   fileExtension?: string;
 };
 
+/**
+ * Represents a single extracted frame with its filename and timestamp.
+ */
 export type Frame = {
+  /** Path to the frame file */
   filename: string;
+  /** Start time of the frame in seconds */
   start: number;
 };

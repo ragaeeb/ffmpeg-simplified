@@ -1,7 +1,6 @@
 import os from 'node:os';
 import type { Readable } from 'node:stream';
-import type { NoiseReductionOptions, PreprocessingCallbacks, PreprocessOptions } from '@/types';
-import logger from '@/utils/logger';
+import type { Logger, NoiseReductionOptions, PreprocessingCallbacks, PreprocessOptions } from '@/types';
 import { FFmpeggy } from '@/vendor/ffmpeggy';
 import { NOISE_REDUCTION_OPTIONS_DEFAULTS } from './constants';
 
@@ -40,6 +39,7 @@ const buildConversionFilters = ({
  * @param {string} outputPath - Destination path where the processed file will be written.
  * @param {PreprocessOptions} [options] - Optional preprocessing options.
  * @param {PreprocessingCallbacks} [callbacks] - Optional callbacks for progress tracking.
+ * @param {Logger} [logger] - Optional logger for debug and error messages.
  * @returns {Promise<string>} - Promise resolving to the path of the processed media file.
  */
 export const formatMedia = async (
@@ -47,8 +47,9 @@ export const formatMedia = async (
     outputPath: string,
     options?: PreprocessOptions,
     callbacks?: PreprocessingCallbacks,
+    logger?: Logger,
 ): Promise<string> => {
-    logger.debug(`formatMedia: ${input}, outputPath: ${outputPath}`);
+    logger?.debug?.(`formatMedia: ${input}, outputPath: ${outputPath}`);
 
     if (callbacks?.onPreprocessingStarted) {
         await callbacks.onPreprocessingStarted(outputPath);
@@ -62,7 +63,7 @@ export const formatMedia = async (
                 ...NOISE_REDUCTION_OPTIONS_DEFAULTS,
                 ...options?.noiseReduction,
             });
-            logger.debug(filters, 'Using filters');
+            logger?.debug?.(`Using filters: ${filters.join(', ')}`);
             if (filters.length > 0) {
                 outputOptions.push(`-af ${filters.join(',')}`);
             }
@@ -71,10 +72,10 @@ export const formatMedia = async (
         if (options?.fast) {
             const maxThreads = os.cpus().length;
             outputOptions.push(`-threads ${maxThreads}`);
-            logger.debug(`Using fast mode with ${maxThreads} threads`);
+            logger?.debug?.(`Using fast mode with ${maxThreads} threads`);
         }
 
-        logger.debug(`saveTo: ${outputPath}`);
+        logger?.debug?.(`saveTo: ${outputPath}`);
 
         const ffmpeggy = new FFmpeggy({
             autorun: true,
@@ -86,7 +87,7 @@ export const formatMedia = async (
 
         ffmpeggy
             .on('error', (err) => {
-                logger.error(`Error during file conversion: ${err.message}`);
+                logger?.error?.(`Error during file conversion: ${err.message}`);
                 reject(err);
             })
             .on('progress', (progress) => {
@@ -95,7 +96,7 @@ export const formatMedia = async (
                 }
             })
             .on('done', async () => {
-                logger.debug(`Formatted file: ${outputPath}`);
+                logger?.debug?.(`Formatted file: ${outputPath}`);
 
                 if (callbacks?.onPreprocessingFinished) {
                     await callbacks.onPreprocessingFinished(outputPath);

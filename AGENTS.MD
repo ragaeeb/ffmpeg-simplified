@@ -4,7 +4,7 @@
 - Use **Bun** commands for dependency management (`bun install`, `bun update`, `bun add`, etc.).
 - Build artifacts with `bun run build` (tsdown) and run the suite with `bun test`.
 - Always keep the tooling on the latest released versions: run `bun update --latest` after touching `package.json`.
-- Tests rely on `testing/sample.*` fixtures that are wired up through `setupTests.ts` via `bun test --preload`.
+- Tests rely on `testing/sample.*` fixtures that are wired up through `setupTests.ts` via the preload configuration in `bunfig.toml`.
 - Changes that affect behaviour must be reflected in `README.md`.
 
 ## Repository map

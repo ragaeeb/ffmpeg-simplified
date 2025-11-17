@@ -54,20 +54,17 @@ export const detectSilences = (
         const nullSink = os.platform() === 'win32' ? 'NUL' : '/dev/null';
 
         const ffmpeggy = new FFmpeggy({
-            autorun: true,
+            autorun: false, // Don't autorun so we can set up stderr listener first
             input: filePath,
             output: nullSink,
             outputOptions: [`-af silencedetect=n=${silenceThreshold}dB:d=${silenceDuration}`, '-f null'],
         });
 
-        // Capture stderr output through progress events
-        // ffmpeggy doesn't expose raw stderr, but silencedetect info appears in logs
+        // Capture stderr output - ffmpeggy stores process as this.process
         let stderrBuffer = '';
 
-        // Hook into the internal process if available (undocumented but works)
-        ffmpeggy.on('start', () => {
-            // Access the child process if exposed
-            const proc = (ffmpeggy as any).proc;
+        // Set up stderr listener function
+        const setupStderrListener = (proc: any) => {
             if (proc?.stderr) {
                 proc.stderr.on('data', (chunk: Buffer) => {
                     stderrBuffer += chunk.toString();
@@ -76,7 +73,26 @@ export const detectSilences = (
                     silenceLines.push(...lines);
                 });
             }
+        };
+
+        // Start the process - run() returns the process synchronously
+        const runPromise = ffmpeggy.run();
+        
+        // Try to set up listener immediately - process should be available synchronously
+        // Use setImmediate to ensure process is created but before stderr data flows
+        setImmediate(() => {
+            const proc = (ffmpeggy as any).process;
+            setupStderrListener(proc);
         });
+
+        // Also try on 'start' event
+        ffmpeggy.on('start', () => {
+            const proc = (ffmpeggy as any).process;
+            setupStderrListener(proc);
+        });
+
+        // Handle run() promise errors
+        runPromise.catch(reject);
 
         ffmpeggy.on('done', () => {
             const silences = mapOutputToSilenceResults(silenceLines);

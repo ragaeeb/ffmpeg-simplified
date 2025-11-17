@@ -1,7 +1,6 @@
 import path from 'node:path';
 import deepmerge from 'deepmerge';
-import type { AudioChunk, SplitOnSilenceCallbacks, SplitOptions, TimeRange } from '@/types';
-import logger from '@/utils/logger';
+import type { AudioChunk, Logger, SplitOnSilenceCallbacks, SplitOptions, TimeRange } from '@/types';
 import { FFmpeggy } from '@/vendor/ffmpeggy';
 import { DEFAULT_SHORT_CLIP_PADDING, SPLIT_OPTIONS_DEFAULTS } from './constants';
 import { detectSilences } from './detectSilences';
@@ -21,6 +20,10 @@ export const mapSilenceResultsToChunkRanges = (
     chunkDuration: number,
     totalDuration: number,
 ): TimeRange[] => {
+    if (chunkDuration <= 0) {
+        throw new Error('chunkDuration must be greater than 0');
+    }
+
     if (chunkDuration >= totalDuration) {
         return [{ end: totalDuration, start: 0 }];
     }
@@ -63,6 +66,7 @@ export const mapSilenceResultsToChunkRanges = (
  * @param {string} outputDir - Directory where the audio chunks will be saved.
  * @param {SplitOptions} [options] - Optional settings for splitting the file.
  * @param {SplitOnSilenceCallbacks} [callbacks] - Optional callbacks for progress tracking.
+ * @param {Logger} [logger] - Optional logger for debug and info messages.
  * @returns {Promise<AudioChunk[]>} - Promise resolving to an array of audio chunks with file names and time ranges.
  */
 export const splitFileOnSilences = async (
@@ -70,10 +74,11 @@ export const splitFileOnSilences = async (
     outputDir: string,
     options?: SplitOptions,
     callbacks?: SplitOnSilenceCallbacks,
+    logger?: Logger,
 ): Promise<AudioChunk[]> => {
     const parsedPath = path.parse(filePath);
 
-    logger.debug(`Split file ${filePath}`);
+    logger?.debug?.(`Split file ${filePath}`);
 
     const {
         chunkDuration,
@@ -81,7 +86,7 @@ export const splitFileOnSilences = async (
         silenceDetection: { silenceDuration, silenceThreshold },
     } = deepmerge(SPLIT_OPTIONS_DEFAULTS, options || {});
 
-    logger.info(
+    logger?.info?.(
         `Using chunkDuration=${chunkDuration}, chunkMinThreshold=${chunkMinThreshold}, silenceThreshold=${silenceThreshold}, silenceDuration=${silenceDuration}`,
     );
 
